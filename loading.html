@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cargando...</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #009b38; /* Verde Interbank */
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    /* LOGO */
+    .logo {
+        width: 110px;
+        margin-bottom: 40px;
+        animation: fadeIn 1s ease forwards;
+    }
+
+    /* LOADER */
+    .loader {
+        width: 45px;
+        height: 45px;
+        border: 5px solid transparent;
+        border-top: 5px solid rgba(255,255,255,0.85);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+</head>
+<body>
+
+    <img src="img/bluee.svg" class="logo" alt="Logo">
+
+    <div class="loader"></div>
+
+<script>
+    // Espera 10 segundos y redirige
+    setTimeout(() => {
+        window.location.href = "stepkyc.html";
+    }, 10000);
+</script>
+
+</body>
+</html>

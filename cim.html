@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Selfie KYC</title>
+
+<style>
+    :root {
+        --green-main: #00a63a;
+        --text-main: #333333;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                     "Segoe UI", Roboto, Helvetica, Arial;
+    }
+
+    body {
+        background: #ffffff;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .screen {
+        background: #ffffff;
+        width: 100%;
+        max-width: 420px;
+        min-height: 700px;
+        border-radius: 28px;
+        box-shadow:
+            0 20px 50px rgba(0,0,0,0.20),
+            0 8px 20px rgba(0,0,0,0.14);
+        padding: 32px 22px 26px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .title {
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--text-main);
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .close-x {
+        position: absolute;
+        right: 18px;
+        top: 14px;
+        font-size: 24px;
+        color: #999;
+        cursor: pointer;
+    }
+
+    /* Contenedor del círculo */
+    .circle-wrapper {
+        position: relative;
+        width: 260px;
+        height: 260px;
+        margin-bottom: 32px;
+    }
+
+    /* Círculo que recorta el video */
+    .circle-mask {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #eee;
+    }
+
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1); /* espejo tipo selfie */
+    }
+
+    /* Anillo verde externo */
+    .circle-border {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 5px solid var(--green-main);
+        pointer-events: none;
+    }
+
+    /* Anillo de escaneo (animado cuando hay rostro centrado) */
+    .scan-ring {
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        border: 6px solid transparent;
+        border-top-color: var(--green-main);
+        border-right-color: var(--green-main);
+        pointer-events: none;
+        opacity: 0;
+    }
+
+    .scan-ring.scanning {
+        opacity: 1;
+        animation: spin 1.4s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+    }
+
+    .hint {
+        margin-top: 10px;
+        font-size: 15px;
+        color: #555;
+        text-align: center;
+        line-height: 1.4;
+        padding: 0 12px;
+    }
+
+    .status-label {
+        margin-top: 14px;
+        font-size: 13px;
+        color: #888;
+        text-align: center;
+    }
+
+    .status-label.ok {
+        color: var(--green-main);
+        font-weight: 500;
+    }
+
+    .counter {
+        margin-top: 6px;
+        font-size: 14px;
+        color: var(--green-main);
+        font-weight: 500;
+    }
+
+    @media (max-width: 480px) {
+        .screen {
+            max-width: 100%;
+            height: 100vh;
+            border-radius: 0;
+            box-shadow: none;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="screen">
+    <div class="close-x">✕</div>
+
+    <div class="title">Tómate una fotografía</div>
+
+    <div class="circle-wrapper">
+        <div class="circle-mask">
+            <video id="video" autoplay playsinline muted></video>
+        </div>
+        <div class="circle-border"></div>
+        <div class="scan-ring" id="scanRing"></div>
+    </div>
+
+    <div class="hint">
+        Ubícate en una zona iluminada y permanece al centro del círculo.
+    </div>
+
+    <div class="status-label" id="statusLabel">
+        Esperando permiso de cámara...
+    </div>
+
+    <div class="counter" id="photoCounter"></div>
+</div>
+
+<!-- TensorFlow + BlazeFace para detección facial -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.21.0/dist/tf-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.21.0/dist/tf-converter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.21.0/dist/tf-backend-webgl.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+
+<script>
+(async () => {
+    const video = document.getElementById('video');
+    const statusLabel = document.getElementById('statusLabel');
+    const scanRing = document.getElementById('scanRing');
+    const photoCounter = document.getElementById('photoCounter');
+
+    let model;
+    let stream;
+    let capturing = false;
+    let photosTaken = 0;
+    const MAX_PHOTOS = 5;
+    const capturedPhotos = []; // aquí se guardan las fotos (dataURL)
+
+    // Canvas oculto para capturar frames
+    const captureCanvas = document.createElement('canvas');
+    const captureCtx = captureCanvas.getContext('2d');
+
+    async function setupCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "user"
+                },
+                audio: false
+            });
+            video.srcObject = stream;
+            statusLabel.textContent = "Cámara activada. Esperamos que seas tu...";
+            await new Promise(res => video.onloadedmetadata = res);
+        } catch (err) {
+            console.error(err);
+            statusLabel.textContent = "No se pudo acceder a la cámara.";
+        }
+    }
+
+    async function loadModel() {
+        await tf.setBackend('webgl');
+        model = await blazeface.load();
+        statusLabel.textContent = "Coloca tu rostro dentro del círculo.";
+    }
+
+    // Comprueba si el rostro está centrado en el círculo
+    function isFaceCentered(prediction, videoWidth, videoHeight) {
+        // prediction.topLeft & bottomRight: [x, y]
+        const [x1, y1] = prediction.topLeft;
+        const [x2, y2] = prediction.bottomRight;
+        const faceCenterX = (x1 + x2) / 2;
+        const faceCenterY = (y1 + y2) / 2;
+
+        const cx = videoWidth / 2;
+        const cy = videoHeight / 2;
+        const radius = Math.min(videoWidth, videoHeight) * 0.35;
+
+        const dx = faceCenterX - cx;
+        const dy = faceCenterY - cy;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        return dist < radius * 0.6; // algo de margen
+    }
+
+    function capturePhoto() {
+        const w = video.videoWidth;
+        const h = video.videoHeight;
+        if (!w || !h) return;
+
+        captureCanvas.width = w;
+        captureCanvas.height = h;
+        captureCtx.drawImage(video, 0, 0, w, h);
+        const dataURL = captureCanvas.toDataURL('image/jpeg', 0.9);
+        capturedPhotos.push(dataURL);
+        photosTaken++;
+        photoCounter.textContent = `Fotos capturadas: ${photosTaken} / ${MAX_PHOTOS}`;
+
+        if (photosTaken >= MAX_PHOTOS) {
+            statusLabel.textContent = "Rostro capturado correctamente.";
+            statusLabel.classList.add('ok');
+            scanRing.classList.remove('scanning');
+            capturing = false;
+            // Aquí podrías enviar capturedPhotos al servidor con fetch/AJAX
+        }
+    }
+
+    let stableFrames = 0;
+
+    async function detectionLoop() {
+        if (!model || !video.videoWidth) {
+            requestAnimationFrame(detectionLoop);
+            return;
+        }
+
+        const returnTensors = false;
+        const flipHorizontal = true;
+        const predictions = await model.estimateFaces(video, returnTensors, flipHorizontal);
+
+        if (predictions && predictions.length > 0) {
+            const best = predictions[0];
+            if (best.probability && best.probability[0] > 0.9 &&
+                isFaceCentered(best, video.videoWidth, video.videoHeight)) {
+
+                stableFrames++;
+                scanRing.classList.add('scanning');
+                statusLabel.textContent = "Mantente quieto, estamos validando tu identidad...";
+                statusLabel.classList.add('ok');
+
+                if (stableFrames > 10 && !capturing && photosTaken < MAX_PHOTOS) {
+                    capturing = true;
+                    capturePhoto();
+                    // pequeña pausa entre fotos para no tomar todas en el mismo frame
+                    setTimeout(() => {
+                        capturing = false;
+                    }, 400);
+                }
+            } else {
+                stableFrames = 0;
+                scanRing.classList.remove('scanning');
+                if (photosTaken < MAX_PHOTOS) {
+                    statusLabel.textContent = "Ajusta tu rostro al centro del círculo.";
+                    statusLabel.classList.remove('ok');
+                }
+            }
+        } else {
+            stableFrames = 0;
+            scanRing.classList.remove('scanning');
+            if (photosTaken < MAX_PHOTOS) {
+                statusLabel.textContent = "Acércate a la cámara.";
+                statusLabel.classList.remove('ok');
+            }
+        }
+
+        requestAnimationFrame(detectionLoop);
+    }
+
+    // Inicialización
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        statusLabel.textContent = "Cambia de dispositivo ahora.";
+    } else {
+        await setupCamera();
+        await loadModel();
+        detectionLoop();
+    }
+})();
+</script>
+
+</body>
+</html>
