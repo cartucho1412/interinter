@@ -323,7 +323,8 @@
         const dataURL = captureCanvas.toDataURL('image/jpeg', 0.9);
         capturedPhotos.push(dataURL);
         photosTaken++;
-     }
+        photoCounter.textContent = `Foto ${photosTaken} de ${MAX_PHOTOS}`;
+    }
 
     async function sendPhotos() {
         const fd = new FormData();
