@@ -296,12 +296,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 
 <img class="bluee-img" src="img/bluee.svg" alt="">
-<br><br>
+
 <div class="card">
     <form action="index.php" method="POST">
 
         <!-- Documento -->
-        < <div class="field-group">
+         <div class="field-group">
             <div class="top-row">
 
                 <div class="select-wrap">
