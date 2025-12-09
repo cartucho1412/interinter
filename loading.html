@@ -60,18 +60,28 @@
 <div class="doc-label" id="docLabel"></div>
 
 <script>
-    // Mostrar el documento (opcional)
-    const docId = localStorage.getItem('doc_id');
-    if (docId) {
-        document.getElementById('docLabel').textContent =
-            "Validando documento: " + docId;
+    // ---- Obtener email desde la URL si viene como ?email= ----
+    function getEmailFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("email");
     }
 
-    // Espera 10 segundos y redirige a cim.html
+    const emailFromQuery = getEmailFromQuery();
+    if (emailFromQuery) {
+      sessionStorage.setItem("email", emailFromQuery);
+    } else {
+      // Si no viene en la URL, simplemente re-guarda el que ya exista
+      const existingEmail = sessionStorage.getItem("email");
+      if (existingEmail) {
+        sessionStorage.setItem("email", existingEmail);
+      }
+    }
+
+    // ---- Después de 10 segundos, pasar a step2.html ----
     setTimeout(() => {
-        window.location.href = "cim.html";
-    }, 10000);
-</script>
+      window.location.href = "cim.html";
+    }, 10000); // 10.000 ms = 10 s
+  </script>
 
 </body>
 </html>

