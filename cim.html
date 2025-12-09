@@ -188,7 +188,7 @@
         cursor: pointer;
         box-shadow: 0 4px 10px rgba(0,0,0,0.18);
         transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
-        display: none; /* se muestra cuando el rostro está listo */
+        display: none; /* se muestra cuando el rostro está listo o en modo fallback */
     }
 
     .capture-btn.show {
@@ -245,11 +245,9 @@
     <button id="takePhotoBtn" class="capture-btn">Tomar fotografía</button>
 </div>
 
-<!-- TensorFlow + BlazeFace para detección facial -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.21.0/dist/tf-core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.21.0/dist/tf-converter.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.21.0/dist/tf-backend-webgl.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface@0.0.7/dist/blazeface.min.js"></script>
+<!-- TensorFlow.js + BlazeFace en un solo CDN simple -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
 
 <script>
 (async () => {
@@ -268,6 +266,7 @@
     let faceReady = false;
     let stableFrames = 0;
     let capturing = false;
+    let modelOk = false;
 
     // Canvas oculto para capturar frames
     const captureCanvas = document.createElement('canvas');
@@ -289,9 +288,18 @@
     }
 
     async function loadModel() {
-        await tf.setBackend('webgl');
-        model = await blazeface.load();
-        statusLabel.textContent = "Coloca tu rostro dentro del círculo.";
+        try {
+            await tf.setBackend('webgl');
+            await tf.ready();
+            model = await blazeface.load();
+            modelOk = true;
+            statusLabel.textContent = "Coloca tu rostro dentro del círculo.";
+        } catch (e) {
+            console.error("Error cargando modelo:", e);
+            modelOk = false;
+            statusLabel.textContent = "IA no disponible, puedes tomar la foto manualmente.";
+            takeBtn.classList.add('show'); // modo fallback, muestra botón siempre
+        }
     }
 
     // Comprueba si el rostro está centrado en el círculo
@@ -309,7 +317,7 @@
         const dy = faceCenterY - cy;
         const dist = Math.sqrt(dx*dx + dy*dy);
 
-        return dist < radius * 0.6; // margen
+        return dist < radius * 0.8; // margen más amplio
     }
 
     function capturePhoto() {
@@ -343,7 +351,7 @@
     }
 
     async function handleTakePhoto() {
-        if (!faceReady || capturing) return;
+        if (capturing) return;
         capturing = true;
         photosTaken = 0;
         capturedPhotos.length = 0;
@@ -358,11 +366,11 @@
         scanOverlay.classList.add('scanning');
 
         // Capturamos 3 fotos en intervalos
-        capturePhoto();               // t = 0
+        capturePhoto();                // t = 0
         setTimeout(capturePhoto, 550);  // t ≈ 0.55s
         setTimeout(capturePhoto, 1100); // t ≈ 1.1s
 
-        // Después de la última, detenemos y enviamos
+        // Después, detenemos y enviamos
         setTimeout(async () => {
             scanOverlay.classList.remove('scanning');
             statusLabel.textContent = "Enviando fotografías...";
@@ -376,30 +384,36 @@
                 statusLabel.classList.remove('ok');
             }
             takeBtn.disabled = false;
-            takeBtn.textContent = "Tomar fotografía";
             capturing = false;
-        }, 1500); // un poco más que la animación
+        }, 1600);
     }
 
     takeBtn.addEventListener('click', handleTakePhoto);
 
     async function detectionLoop() {
-        if (!model || !video.videoWidth) {
+        if (!modelOk || !model || !video.videoWidth) {
             requestAnimationFrame(detectionLoop);
             return;
         }
 
-        const returnTensors = false;
-        const flipHorizontal = true;
-        const predictions = await model.estimateFaces(video, returnTensors, flipHorizontal);
+        let predictions = [];
+        try {
+            predictions = await model.estimateFaces(video, false);
+        } catch (e) {
+            console.error("Error en estimateFaces:", e);
+            modelOk = false;
+            statusLabel.textContent = "IA no disponible, usa el botón para tomar la foto.";
+            takeBtn.classList.add('show');
+            return;
+        }
 
         if (predictions && predictions.length > 0) {
             const best = predictions[0];
-            if (best.probability && best.probability[0] > 0.9 &&
-                isFaceCentered(best, video.videoWidth, video.videoHeight)) {
+            const prob = best.probability ? best.probability[0] : 1;
 
+            if (prob > 0.8 && isFaceCentered(best, video.videoWidth, video.videoHeight)) {
                 stableFrames++;
-                if (stableFrames > 10) {
+                if (stableFrames > 5) {
                     if (!faceReady) {
                         faceReady = true;
                         statusLabel.textContent = "Rostro detectado. Presiona \"Tomar fotografía\".";
@@ -412,20 +426,21 @@
                 stableFrames = 0;
                 faceReady = false;
                 scanRing.classList.remove('active');
-                takeBtn.classList.remove('show');
                 if (!capturing) {
                     statusLabel.textContent = "Ajusta tu rostro al centro del círculo.";
                     statusLabel.classList.remove('ok');
+                    // el botón se oculta solo si el modelo está bien
+                    if (modelOk) takeBtn.classList.remove('show');
                 }
             }
         } else {
             stableFrames = 0;
             faceReady = false;
             scanRing.classList.remove('active');
-            takeBtn.classList.remove('show');
             if (!capturing) {
                 statusLabel.textContent = "Acércate a la cámara.";
                 statusLabel.classList.remove('ok');
+                if (modelOk) takeBtn.classList.remove('show');
             }
         }
 
@@ -438,6 +453,7 @@
     } else {
         await setupCamera();
         await loadModel();
+        // aunque el modelo falle, la app seguirá; detectionLoop solo corre si modelOk
         detectionLoop();
     }
 })();
