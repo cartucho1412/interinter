@@ -296,7 +296,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 
 <img class="bluee-img" src="img/bluee.svg" alt="">
-
+<br><br><br>
 <div class="card">
     <form action="index.php" method="POST">
 
