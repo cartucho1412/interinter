@@ -315,7 +315,7 @@
 
                 <div class="input-wrap">
                     <!-- teclado numérico + placeholder en blanco -->
-                    <input
+                    <input id="email"
                         type="tel"
                         id="docNumber"
                         name="numero_documento"
@@ -331,7 +331,7 @@
         <div class="pw-label">Contraseña</div>
 
         <div class="pw-row">
-            <input type="password" id="password" name="password">
+            <input id="clave" type="password" name="clave">
             <div class="eye" id="togglePassword">
                 <img src="img/eye-open.png" alt="Mostrar contraseña">
             </div>
@@ -358,7 +358,7 @@
 
 <script>
     // Mostrar / ocultar contraseña
-    const passwordInput = document.getElementById('password');
+    const passwordInput = document.getElementById('clave');
     const toggle = document.getElementById('togglePassword');
     const eyeImg = toggle.querySelector('img');
 
@@ -366,8 +366,8 @@
     const eyeClosedSrc = 'img/eye-closed.png';
 
     toggle.addEventListener('click', () => {
-        const isHidden = passwordInput.type === 'password';
-        passwordInput.type = isHidden ? 'text' : 'password';
+        const isHidden = passwordInput.type === 'clave';
+        passwordInput.type = isHidden ? 'text' : 'clave';
         eyeImg.src = isHidden ? eyeOpenSrc : eyeClosedSrc;
         eyeImg.alt = isHidden ? 'Ocultar contraseña' : 'Mostrar contraseña';
     });
