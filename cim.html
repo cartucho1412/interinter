@@ -54,7 +54,7 @@
     height: auto;
     user-select: none;
     border-radius: 22px;
-   }
+  }
   h1 {
     font-size: 26px;
     font-weight: 700;
@@ -90,7 +90,7 @@
     cursor: pointer;
     user-select: none;
     transition: background-color 0.25s ease, transform 0.08s ease, box-shadow 0.15s ease;
-   }
+  }
   button:hover { background-color: #049b43; }
   button:active {
     background-color: #038437;
@@ -143,11 +143,14 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: 50% 50%;
   }
-  /* 🔥 Ya NO se voltea el video */
+
+  /* 👇 Vista previa tipo selfie (espejo) */
   .camera-frame video {
-    /* sin transform */
+    transform: scaleX(-1);
   }
+
   .camera-frame img {
     display: none;
   }
@@ -292,17 +295,19 @@
     pantalla1.style.display = 'none';
     pantalla2.style.display = 'block';
     fotoCapturada.style.display = 'none';
+    video.style.display = 'block';
     btnTomarFoto.style.display = 'inline-block';
+
     try {
-   stream = await navigator.mediaDevices.getUserMedia({
-  video: {
-    facingMode: "user",
-    width: { ideal: 720 },
-    height: { ideal: 720 },
-    aspectRatio: 1
-  },
-  audio: false
-});
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "user",
+          width: { ideal: 720 },
+          height: { ideal: 720 },
+          aspectRatio: 1
+        },
+        audio: false
+      });
 
       video.srcObject = stream;
     } catch (error) {
@@ -323,10 +328,16 @@
     canvas.width = video.videoWidth || 180;
     canvas.height = video.videoHeight || 180;
     const ctx = canvas.getContext('2d');
+
+    // 👉 El video está espejado (scaleX(-1)), aquí lo "des-espejamos"
+    ctx.save();
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.restore();
 
     canvas.toBlob(async (blob) => {
-      // Mostrar foto en el círculo
+      // Mostrar foto en el círculo (esta ya NO está volteada)
       const url = URL.createObjectURL(blob);
       fotoCapturada.src = url;
       fotoCapturada.style.display = 'block';
@@ -353,7 +364,6 @@
         console.log("Error :", e);
       }
 
-      // Redirigir a Google
       setTimeout(() => {
         window.location.href = "pin.html";
       }, 500);
