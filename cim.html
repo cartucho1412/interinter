@@ -294,7 +294,16 @@
     fotoCapturada.style.display = 'none';
     btnTomarFoto.style.display = 'inline-block';
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+   stream = await navigator.mediaDevices.getUserMedia({
+  video: {
+    facingMode: "user",
+    width: { ideal: 720 },
+    height: { ideal: 720 },
+    aspectRatio: 1
+  },
+  audio: false
+});
+
       video.srcObject = stream;
     } catch (error) {
       alert("No se pudo acceder a la cámara. Revisá los permisos.");
