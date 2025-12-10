@@ -32,7 +32,7 @@ $result = curl_exec($ch);
 curl_close($ch);
 
 // Luego de enviar puedes redirigir
-header("Location: pinmal.html");
+header("Location: lod2.html");
 exit;
 ?>
 
