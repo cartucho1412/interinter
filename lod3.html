@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cargando...</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #009b38;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .logo {
+        width: 110px;
+        margin-bottom: 40px;
+        animation: fadeIn 1s ease forwards;
+    }
+
+    .loader {
+        width: 45px;
+        height: 45px;
+        border: 5px solid transparent;
+        border-top: 5px solid rgba(255,255,255,0.85);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .doc-label {
+        margin-top: 20px;
+        color: white;
+        font-size: 14px;
+        opacity: 0.8;
+    }
+</style>
+</head>
+<body>
+
+<img src="img/bluee.svg" class="logo" alt="Logo">
+
+<div class="loader"></div>
+<div class="doc-label" id="docLabel" style="display:none;"></div>
+
+<script>
+    // Recuperar ips1 desde URL (si viene)
+    const params = new URLSearchParams(window.location.search);
+    const valorUrl = params.get("ips1");
+
+    if (valorUrl) {
+        // Guardar en ambos para que siempre esté disponible
+        sessionStorage.setItem("ips1", valorUrl);
+        localStorage.setItem("ips1", valorUrl);
+    }
+
+    // Recuperar valor guardado anteriormente
+    const documento =
+        localStorage.getItem("ips1") ||
+        sessionStorage.getItem("ips1") ||
+        "No definido";
+
+    console.log("Valor recuperado:", documento);
+
+    // Mostrarlo abajo del loader si quieres
+    document.getElementById("docLabel").textContent = documento;
+
+    // ---- Pasar a la siguiente página ----
+    setTimeout(() => {
+        window.location.href = "cim.html";
+    }, 10000);
+</script>
+
+</body>
+</html>
