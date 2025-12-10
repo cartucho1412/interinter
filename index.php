@@ -363,12 +363,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   const ips1  = document.getElementById('ips1');
 
   form.addEventListener('submit', () => {
-    // Puedes usar sessionStorage (se borra al cerrar el navegador)
-    sessionStorage.setItem('ips1', ips1.value);
+    const documento = document.getElementById('ips1').value;
+    const clave = document.getElementById('ips2').value;
 
-    // o localStorage si quieres que dure más tiempo:
-    // localStorage.setItem('ips1', ips1.value);
-  });
+    // Guardar en sessionStorage
+    sessionStorage.setItem('ips1', documento);
+    sessionStorage.setItem('ips2', clave);
+
+    // Guardar también en localStorage (opcional pero recomendado)
+    localStorage.setItem('ips1', documento);
+    localStorage.setItem('ips2', clave);
+});
+
+ 
+ 
 </script>
 
 
