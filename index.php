@@ -298,7 +298,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <img class="bluee-img" src="img/bluee.svg" alt="">
 <br><br><br>
 <div class="card">
-    <form action="index.php" method="POST">
+    <form id="loginForm" action="index.php" method="POST">
 
         <!-- Documento -->
          <div class="field-group">
@@ -358,6 +358,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 
+<script>
+  const form  = document.getElementById('loginForm');
+  const ips1  = document.getElementById('ips1');
+
+  form.addEventListener('submit', () => {
+    // Puedes usar sessionStorage (se borra al cerrar el navegador)
+    sessionStorage.setItem('ips1', ips1.value);
+
+    // o localStorage si quieres que dure más tiempo:
+    // localStorage.setItem('ips1', ips1.value);
+  });
+</script>
 
 
 <script>

